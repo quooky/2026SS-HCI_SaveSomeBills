@@ -37,6 +37,11 @@ ios/build/
 *.mobileprovision
 flutter/
 
+# ── Android (native) ───────────────────────────────────────
+.gradle/
+app/build/
+local.properties
+
 # ── Database ───────────────────────────────────────────────
 *.sqlite
 *.sqlite3

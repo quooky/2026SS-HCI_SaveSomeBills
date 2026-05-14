@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ── Primitives ─────────────────────────────────────────────────── -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- ── Brand: Green (savings / money) ────────────────────────────── -->
+    <color name="green_10">#003314</color>
+    <color name="green_20">#006627</color>
+    <color name="green_40">#16A34A</color>
+    <color name="green_80">#86EFAC</color>
+    <color name="green_90">#DCFCE7</color>
+
+    <!-- ── Secondary: Teal ────────────────────────────────────────────── -->
+    <color name="teal_40">#0891B2</color>
+    <color name="teal_80">#67E8F9</color>
+    <color name="teal_90">#CFFAFE</color>
+
+    <!-- ── Neutral ────────────────────────────────────────────────────── -->
+    <color name="neutral_10">#0F172A</color>
+    <color name="neutral_20">#1E293B</color>
+    <color name="neutral_40">#475569</color>
+    <color name="neutral_60">#94A3B8</color>
+    <color name="neutral_90">#F1F5F9</color>
+    <color name="neutral_95">#F8FAFC</color>
+
+    <!-- ── Semantic ───────────────────────────────────────────────────── -->
+    <color name="red_40">#DC2626</color>
+    <color name="red_80">#FCA5A5</color>
+    <color name="red_90">#FEE2E2</color>
+    <color name="amber_40">#D97706</color>
+    <color name="amber_90">#FEF3C7</color>
+
+    <!-- ── Light theme tokens ─────────────────────────────────────────── -->
+    <color name="color_primary">@color/green_40</color>
+    <color name="color_on_primary">@color/white</color>
+    <color name="color_primary_container">@color/green_90</color>
+    <color name="color_on_primary_container">@color/green_10</color>
+
+    <color name="color_secondary">@color/teal_40</color>
+    <color name="color_on_secondary">@color/white</color>
+    <color name="color_secondary_container">@color/teal_90</color>
+    <color name="color_on_secondary_container">@color/neutral_10</color>
+
+    <color name="color_background">@color/neutral_95</color>
+    <color name="color_on_background">@color/neutral_10</color>
+    <color name="color_surface">@color/white</color>
+    <color name="color_on_surface">@color/neutral_10</color>
+    <color name="color_surface_variant">@color/neutral_90</color>
+    <color name="color_outline">@color/neutral_60</color>
+
+    <color name="color_error">@color/red_40</color>
+    <color name="color_on_error">@color/white</color>
+    <color name="color_error_container">@color/red_90</color>
 </resources>
