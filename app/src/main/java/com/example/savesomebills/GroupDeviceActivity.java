@@ -1,6 +1,8 @@
 package com.example.savesomebills;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.savesomebills.list_and_group.GroupViewAdapter;
+import com.example.savesomebills.list_and_group.Translator;
 
 import java.util.ArrayList;
 
@@ -26,10 +29,18 @@ public class GroupDeviceActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        String json = "";
 
 
         RecyclerView recyclerView = findViewById(R.id.group_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new GroupViewAdapter(new ArrayList<>(1),""));
+        recyclerView.setAdapter(new GroupViewAdapter(Translator.translate_to_Group(json)));
+    }
+
+
+    public void group_Button_click(View view){
+        Intent intent = new Intent(this, ListDeviceActivity.class);
+        intent.putExtra("object_list", (int[]) view.getTag());
+        startActivity(intent);
     }
 }

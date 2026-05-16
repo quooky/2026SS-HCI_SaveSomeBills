@@ -15,13 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHolder> {
-    List<Integer> id_list;
-    String json;
+    List<Energy_Object> id_list;
 
 
-    public ListViewAdapter(List<Integer> id_list, String json) {
+    public ListViewAdapter(List<Energy_Object> id_list) {
         this.id_list = id_list;
-        this.json = json;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
@@ -71,8 +69,7 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ListViewAdapter.ViewHolder holder, int position) {
-          int id = id_list.get(position);
-          Energy_Object ob = Translator.translate_to_energy_object(id,json);
+          Energy_Object ob = id_list.get(position);
           holder.getName().setText(ob.getName());
           holder.getEnergy().setText(ob.getEnergy_amount());
           holder.getIcon().setText(ob.getIcon());

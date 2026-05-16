@@ -11,15 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.savesomebills.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.ViewHolder> {
-    List<Integer> id_list;
-    String json;
+    List<Group> group_list;
 
-    public GroupViewAdapter(List<Integer> id_list, String json) {
-        this.id_list = id_list;
-        this.json = json;
+    public GroupViewAdapter(List<Group> id_list) {
+        this.group_list = id_list;
     }
 
     @NonNull
@@ -31,16 +30,21 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        int id = id_list.get(position);
-        Group ob = Translator.translate_to_Group(id,json);
+        Group ob = group_list.get(position);
         holder.getName().setText(ob.getName());
         holder.getEnergy().setText(ob.getEnergy_amount());
         holder.getIcon().setText(ob.getIcon());
+        ArrayList<Integer> list = new ArrayList<>(ob.getId());
+        var help = new int[list.size()];
+        for(int i = 0; i<list.size(); ++i){
+            help[i] = list.get(i);
+        }
+        holder.getButton().setTag(help);
     }
 
     @Override
     public int getItemCount() {
-        return id_list.size();
+        return group_list.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

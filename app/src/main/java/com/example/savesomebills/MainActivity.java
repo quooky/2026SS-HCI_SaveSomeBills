@@ -1,6 +1,9 @@
 package com.example.savesomebills;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -34,11 +37,16 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
     }
-
+    public void button_start(View view){
+        Intent intent = new Intent(this, GroupDeviceActivity.class);
+        startActivity(intent);
+    }
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .commit();
     }
+
+
 }

@@ -9,11 +9,17 @@ public class Energy_Object {
     String icon;
     String name;
     String energy_amount;
+    int id;
 
-    public Energy_Object(String icon, String name, String energy_amount) {
+    public Energy_Object(String icon, String name, String energy_amount,int id) {
         this.icon = icon;
         this.name = name;
         this.energy_amount = energy_amount;
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getIcon() {
