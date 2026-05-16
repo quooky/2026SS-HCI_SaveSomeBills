@@ -12,10 +12,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SaveSomeBills">
         <activity
+            android:name=".GroupDeviceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ListDeviceActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
