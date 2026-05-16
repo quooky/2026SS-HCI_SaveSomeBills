@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SaveSomeBills</string>
     <string name="title_activity_home_screen">HomeScreen</string>
+    <string name="title_activity_add_device_screen">add_device_screen</string>
 </resources>
