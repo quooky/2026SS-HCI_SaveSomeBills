@@ -6,31 +6,31 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/neutral_10"
+    android:background="?attr/appColorBackground"
     tools:context=".AddDevice">
 
     <!-- Top bar -->
     <ImageButton
         android:id="@+id/imageButton3"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_button_size"
+        android:layout_height="@dimen/icon_button_size"
         android:layout_marginStart="@dimen/spacing_sm"
         android:layout_marginTop="@dimen/spacing_sm"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_arrow_back"
-        android:tint="@color/white"
+        app:tint="?attr/appColorOnSurface"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/imageButton2"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_button_size"
+        android:layout_height="@dimen/icon_button_size"
         android:layout_marginEnd="@dimen/spacing_sm"
         android:layout_marginTop="@dimen/spacing_sm"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_dialog_info"
-        android:tint="@color/white"
+        app:tint="?attr/appColorOnSurface"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,8 +42,8 @@
         android:layout_marginStart="@dimen/spacing_md"
         android:layout_marginTop="@dimen/spacing_sm"
         android:text="Neues Gerät"
-        android:textColor="@color/white"
-        android:textSize="@dimen/text_headline_lg"
+        android:textAppearance="?attr/textAppearanceHeadlineLarge"
+        android:textColor="?attr/appColorOnSurface"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imageButton3" />
@@ -59,48 +59,93 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_title">
 
-        <!-- Name -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
-            android:text="Name"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_body" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <!-- Name + Room in one row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_md"
-            app:boxBackgroundColor="@color/neutral_20"
-            app:boxStrokeColor="@color/input_stroke"
-            app:hintEnabled="false">
+            android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_name"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="z.B. Laptop"
-                android:textColor="@color/white"
-                android:textColorHint="@color/neutral_60" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-        <!-- ON (Stunden/Tag) -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    android:text="Name"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/appColorOnSurface" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxBackgroundColor="?attr/appColorSurface"
+                    app:boxStrokeColor="@color/input_stroke"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/input_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="z.B. Laptop"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionNext"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/appColorOnSurface"
+                        android:textColorHint="?attr/appColorOnSurfaceVariant" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_sm"
+                    android:text="Raum"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/appColorOnSurface" />
+
+                <Spinner
+                    android:id="@+id/spinner_room"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:background="?attr/appColorSurface"
+                    android:paddingStart="@dimen/spacing_sm"
+                    android:paddingEnd="@dimen/spacing_xl"
+                    android:popupBackground="?attr/appColorSurface"
+                    android:textColor="?attr/appColorOnSurface" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- In Betrieb -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_sm"
-            android:text="ON (Stunden/Tag)"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_body" />
+            android:text="In Betrieb (Stunden/Tag)"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/appColorOnSurface" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_md"
-            app:boxBackgroundColor="@color/neutral_20"
+            app:boxBackgroundColor="?attr/appColorSurface"
             app:boxStrokeColor="@color/input_stroke"
             app:hintEnabled="false">
 
@@ -110,25 +155,26 @@
                 android:layout_height="wrap_content"
                 android:hint="0 - 24"
                 android:inputType="number"
-                android:textColor="@color/white"
-                android:textColorHint="@color/neutral_60" />
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/appColorOnSurface"
+                android:textColorHint="?attr/appColorOnSurfaceVariant" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Standby (Stunden/Tag) -->
+        <!-- Standby -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_sm"
             android:text="Standby (Stunden/Tag)"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_body" />
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/appColorOnSurface" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_md"
-            app:boxBackgroundColor="@color/neutral_20"
+            app:boxBackgroundColor="?attr/appColorSurface"
             app:boxStrokeColor="@color/input_stroke"
             app:hintEnabled="false">
 
@@ -138,34 +184,44 @@
                 android:layout_height="wrap_content"
                 android:hint="0 - 24"
                 android:inputType="number"
-                android:textColor="@color/white"
-                android:textColorHint="@color/neutral_60" />
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/appColorOnSurface"
+                android:textColorHint="?attr/appColorOnSurfaceVariant" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- EasyScan button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_easy_scan"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginBottom="@dimen/spacing_md"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginBottom="@dimen/spacing_sm"
             android:text="EasyScan"
-            android:textColor="@color/white"
-            app:backgroundTint="@color/teal_40"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/appColorOnSurface"
+            app:backgroundTint="?attr/appColorAccent"
             app:cornerRadius="@dimen/corner_lg"
             app:icon="@drawable/ic_camera"
             app:iconGravity="textStart" />
 
+        <TextView
+            android:id="@+id/tv_watt_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:text="Scanne das Gerät um die Watt zu bestimmen"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/appColorOnSurfaceVariant" />
+
         <!-- Vorhersage card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:cardBackgroundColor="@color/white"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="?attr/appColorCardBackground"
             app:cardCornerRadius="@dimen/corner_lg">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
@@ -174,8 +230,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/spacing_sm"
                     android:text="Vorhersage"
-                    android:textColor="@color/teal_40"
-                    android:textSize="@dimen/text_body"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/appColorAccent"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -189,23 +245,40 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Kosten pro Stunde"
-                        android:textColor="@color/neutral_40"
-                        android:textSize="@dimen/text_md" />
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/appColorOnSurfaceVariant" />
 
                     <TextView
                         android:id="@+id/tv_cost_per_hour"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.00 €/h"
-                        android:textColor="@color/amber_40"
-                        android:textSize="@dimen/text_md"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/appColorWarning"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <View
+                <FrameLayout
+                    android:id="@+id/gradient_bar_container"
                     android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:background="@drawable/gradient_cost_bar" />
+                    android:layout_height="@dimen/gradient_bar_height"
+                    android:clipChildren="false">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_cost_bar" />
+
+                    <View
+                        android:id="@+id/gradient_bar_indicator"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center_vertical|start"
+                        android:background="@drawable/indicator_circle"
+                        android:elevation="@dimen/elevation_sm"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -230,8 +303,9 @@
             android:layout_marginEnd="@dimen/spacing_sm"
             android:layout_weight="1"
             android:text="Abbrechen"
-            android:textColor="@color/white"
-            app:backgroundTint="@color/neutral_20"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/appColorOnSurface"
+            app:backgroundTint="?attr/appColorSurface"
             app:cornerRadius="@dimen/corner_lg" />
 
         <com.google.android.material.button.MaterialButton
@@ -241,8 +315,9 @@
             android:layout_marginStart="@dimen/spacing_sm"
             android:layout_weight="1"
             android:text="Bestätigen"
-            android:textColor="@color/white"
-            app:backgroundTint="@color/teal_40"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/appColorOnSurface"
+            app:backgroundTint="?attr/appColorAccent"
             app:cornerRadius="@dimen/corner_lg" />
 
     </LinearLayout>

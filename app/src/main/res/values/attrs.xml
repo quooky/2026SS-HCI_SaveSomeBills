@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="appColorBackground"         format="color" />
+    <attr name="appColorSurface"            format="color" />
+    <attr name="appColorOnSurface"          format="color" />
+    <attr name="appColorOnSurfaceVariant"   format="color" />
+    <attr name="appColorAccent"             format="color" />
+    <attr name="appColorAccentOnDark"       format="color" />
+    <attr name="appColorWarning"            format="color" />
+    <attr name="appColorOutline"            format="color" />
+    <attr name="appColorCardBackground"     format="color" />
+</resources>
