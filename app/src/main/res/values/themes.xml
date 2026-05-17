@@ -14,5 +14,60 @@
         <item name="colorOnError">@color/color_on_error</item>
     </style>
 
-    <style name="Theme.SaveSomeBills" parent="Base.Theme.SaveSomeBills" />
+    <style name="Theme.SaveSomeBills" parent="Base.Theme.SaveSomeBills">
+        <!-- ── App color tokens ──────────────────────────────────────────── -->
+        <item name="appColorBackground">@color/neutral_10</item>
+        <item name="appColorSurface">@color/neutral_20</item>
+        <item name="appColorOnSurface">@color/white</item>
+        <item name="appColorOnSurfaceVariant">@color/neutral_60</item>
+        <item name="appColorAccent">@color/teal_40</item>
+        <item name="appColorAccentOnDark">@color/teal_80</item>
+        <item name="appColorWarning">@color/amber_40</item>
+        <item name="appColorOutline">@color/neutral_60</item>
+        <item name="appColorCardBackground">@color/white</item>
+
+        <!-- ── Text appearances ───────────────────────────────────────────── -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.Display</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.App.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.App.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.App.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.App.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.App.TitleMedium</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.App.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.App.BodyMedium</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.App.LabelLarge</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.App.LabelSmall</item>
+    </style>
+
+    <!-- ── Text appearance styles (linked to dimens.xml) ─────────────── -->
+    <style name="TextAppearance.App.Display" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="android:textSize">@dimen/text_display</item>
+    </style>
+    <style name="TextAppearance.App.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">@dimen/text_headline_lg</item>
+    </style>
+    <style name="TextAppearance.App.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">@dimen/text_headline_md</item>
+    </style>
+    <style name="TextAppearance.App.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">@dimen/text_headline_sm</item>
+    </style>
+    <style name="TextAppearance.App.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">@dimen/text_title_lg</item>
+    </style>
+    <style name="TextAppearance.App.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">@dimen/text_title_md</item>
+    </style>
+    <style name="TextAppearance.App.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">@dimen/text_body</item>
+    </style>
+    <style name="TextAppearance.App.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/text_md</item>
+    </style>
+    <style name="TextAppearance.App.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/text_lg</item>
+    </style>
+    <style name="TextAppearance.App.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">@dimen/text_sm</item>
+    </style>
 </resources>
