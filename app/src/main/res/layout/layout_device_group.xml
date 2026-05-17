@@ -25,6 +25,7 @@
         android:layout_marginStart="28dp"
         android:layout_marginTop="7dp"
         android:text="0"
+        android:textColor="?attr/appColorOnSurface"
         app:layout_constraintStart_toEndOf="@+id/device_group_icon"
         app:layout_constraintTop_toBottomOf="@+id/device_group_name" />
 
@@ -35,6 +36,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="7dp"
         android:text="⌀ e/m"
+        android:textColor="?attr/appColorOnSurface"
         app:layout_constraintStart_toEndOf="@+id/device_group_energy"
         app:layout_constraintTop_toBottomOf="@+id/device_group_name" />
 
@@ -45,6 +47,7 @@
         android:layout_marginStart="28dp"
         android:layout_marginTop="48dp"
         android:text="name"
+        android:textColor="?attr/appColorOnSurface"
         app:layout_constraintStart_toEndOf="@+id/device_group_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
