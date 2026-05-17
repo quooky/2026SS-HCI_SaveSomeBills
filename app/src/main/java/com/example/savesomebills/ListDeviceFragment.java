@@ -1,5 +1,6 @@
 package com.example.savesomebills;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,18 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.savesomebills.list_and_group.Energy_Object;
 import com.example.savesomebills.list_and_group.ListViewAdapter;
-import com.example.savesomebills.list_and_group.Translator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ListDeviceFragment extends Fragment {
 
-    private static final String ARG_IDS = "object_list";
+    private static final String ARG_GROUP_ID = "group_id";
 
-    public static ListDeviceFragment newInstance(int[] ids) {
+    public static ListDeviceFragment newInstance(String groupId) {
         ListDeviceFragment fragment = new ListDeviceFragment();
         Bundle args = new Bundle();
-        args.putIntArray(ARG_IDS, ids);
+        args.putString(ARG_GROUP_ID, groupId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -36,16 +37,30 @@ public class ListDeviceFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.list_device, container, false);
 
-        int[] ids = getArguments() != null ? getArguments().getIntArray(ARG_IDS) : new int[0];
-        ArrayList<Integer> idsList = new ArrayList<>();
-        for (int id : ids) idsList.add(id);
+        String groupId = getArguments() != null ? getArguments().getString(ARG_GROUP_ID, "") : "";
 
-        ArrayList<Energy_Object> objects = new ArrayList<>(Translator.translate_to_energy_object(idsList, ""));
+        view.findViewById(R.id.btn_back).setOnClickListener(v ->
+            requireActivity().getSupportFragmentManager().popBackStack()
+        );
+
+        view.findViewById(R.id.fab_add_device).setOnClickListener(v ->
+            startActivity(new Intent(getActivity(), AddDevice.class))
+        );
 
         RecyclerView recyclerView = view.findViewById(R.id.list_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new ListViewAdapter(objects));
+        recyclerView.setAdapter(new ListViewAdapter(buildItems(groupId)));
 
         return view;
+    }
+
+    private List<Energy_Object> buildItems(String groupId) {
+        List<Energy_Object> items = new ArrayList<>();
+        for (Device d : DeviceStorage.loadAll(requireContext())) {
+            if (d.groupId.equals(groupId)) {
+                items.add(new Energy_Object(d.icon, d.name, d.wattOn + " W", 0));
+            }
+        }
+        return items;
     }
 }

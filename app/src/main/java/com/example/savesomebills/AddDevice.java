@@ -42,13 +42,14 @@ public class AddDevice extends AppCompatActivity {
 
     private Spinner           spinnerRoom;
     private TextInputEditText inputName, inputOnHours, inputStandbyHours;
-    private TextView          tvWattResult, tvCostPerHour;
+    private TextView          tvWattResult, tvCostPerHour, tvDeviceIcon;
     private View              gradientBarContainer, gradientBarIndicator;
     private ArrayAdapter<String> roomAdapter;
     private List<String>      rooms = new ArrayList<>();
 
-    private int wattOn      = 0;
-    private int wattStandby = 0;
+    private int    wattOn          = 0;
+    private int    wattStandby     = 0;
+    private String selectedIcon    = "⚡";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +63,16 @@ public class AddDevice extends AppCompatActivity {
         inputStandbyHours = findViewById(R.id.input_standby_hours);
         tvWattResult          = findViewById(R.id.tv_watt_result);
         tvCostPerHour         = findViewById(R.id.tv_cost_per_hour);
+        tvDeviceIcon          = findViewById(R.id.tv_device_icon);
         gradientBarContainer  = findViewById(R.id.gradient_bar_container);
         gradientBarIndicator  = findViewById(R.id.gradient_bar_indicator);
+
+        tvDeviceIcon.setOnClickListener(v ->
+            EmojiPickerDialog.show(this, EmojiPickerDialog.DEVICE_EMOJIS, emoji -> {
+                selectedIcon = emoji;
+                tvDeviceIcon.setText(emoji);
+            })
+        );
 
         loadRooms();
         setupSpinner();
@@ -112,7 +121,7 @@ public class AddDevice extends AppCompatActivity {
                 return;
             }
 
-            DeviceStorage.save(this, new Device(name, selected, onHours, standbyHours, wattOn, wattStandby));
+            DeviceStorage.save(this, new Device(name, selected, onHours, standbyHours, wattOn, wattStandby, selectedIcon));
             Toast.makeText(this, "Gerät gespeichert", Toast.LENGTH_SHORT).show();
             finish();
         });
