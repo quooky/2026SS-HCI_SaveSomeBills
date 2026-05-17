@@ -43,7 +43,8 @@ public class DeviceStorage {
                     obj.getInt("onHours"),
                     obj.getInt("standbyHours"),
                     obj.optInt("wattOn", 0),
-                    obj.optInt("wattStandby", 0)
+                    obj.optInt("wattStandby", 0),
+                    obj.optString("icon", "⚡")
                 );
                 d.objectId = obj.getString("objectId");
                 devices.add(d);
@@ -64,6 +65,7 @@ public class DeviceStorage {
                 obj.put("objectId", d.objectId);
                 obj.put("groupId", d.groupId);
                 obj.put("name", d.name);
+                obj.put("icon", d.icon);
                 obj.put("onHours", d.onHours);
                 obj.put("standbyHours", d.standbyHours);
                 obj.put("wattOn", d.wattOn);

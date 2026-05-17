@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.savesomebills.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHolder> {
@@ -35,28 +34,13 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
             this.energy = view.findViewById(R.id.device_list_energy);
             this.unit = view.findViewById(R.id.device_list_unit);
             this.button = view.findViewById(R.id.device_list_button);
-
         }
 
-        public TextView getName() {
-            return name;
-        }
-
-        public TextView getIcon() {
-            return icon;
-        }
-
-        public TextView getEnergy() {
-            return energy;
-        }
-
-        public TextView getUnit() {
-            return unit;
-        }
-
-        public Button getButton() {
-            return button;
-        }
+        public TextView getName() { return name; }
+        public TextView getIcon() { return icon; }
+        public TextView getEnergy() { return energy; }
+        public TextView getUnit() { return unit; }
+        public Button getButton() { return button; }
     }
 
 
@@ -73,7 +57,6 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
           holder.getName().setText(ob.getName());
           holder.getEnergy().setText(ob.getEnergy_amount());
           holder.getIcon().setText(ob.getIcon());
-          
     }
 
     @Override
