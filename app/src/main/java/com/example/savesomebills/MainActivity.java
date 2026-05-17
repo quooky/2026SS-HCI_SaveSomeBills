@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.nav_home) {
                 loadFragment(new GroupDeviceFragment());
                 return true;
@@ -26,7 +27,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_profile) {
                 loadFragment(new ProfileFragment());
                 return true;
+            } else if (id == R.id.nav_tips) {
+                loadFragment(new TipsFragment());
+                return true;
             }
+
             return false;
         });
 
@@ -34,12 +39,11 @@ public class MainActivity extends AppCompatActivity {
             bottomNav.setSelectedItemId(R.id.nav_favorites);
         }
     }
-private void loadFragment(Fragment fragment) {
+
+    private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .commit();
     }
-
-
 }
