@@ -16,6 +16,15 @@ import java.util.List;
 
 public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.ViewHolder> {
     List<Group> group_list;
+    private OnGroupClickListener listener;
+
+    public interface OnGroupClickListener {
+        void onGroupClick(int[] ids);
+    }
+
+    public void setOnGroupClickListener(OnGroupClickListener listener) {
+        this.listener = listener;
+    }
 
     public GroupViewAdapter(List<Group> id_list) {
         this.group_list = id_list;
@@ -40,6 +49,9 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
             help[i] = list.get(i);
         }
         holder.getButton().setTag(help);
+        holder.getButton().setOnClickListener(v -> {
+            if (listener != null) listener.onGroupClick(help);
+        });
     }
 
     @Override
