@@ -16,11 +16,18 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class HomeFragment extends Fragment {
 
@@ -168,10 +175,50 @@ public class HomeFragment extends Fragment {
 
     // ── Data loading ──────────────────────────────────────────────────────────
 
-    private List<Integer> loadData(String filename) {
+    private List<Integer> loadData(String filename, boolean checkDate) {
         List<Integer> data = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(requireContext().getAssets().open(filename)))) {
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+        if (checkDate) {
+            File file = new File(requireContext().getFilesDir(), filename);
+            if (file.exists()) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+                    String savedDate = reader.readLine();
+                    if (today.equals(savedDate)) {
+                        String dataLine = reader.readLine();
+                        if (dataLine != null) {
+                            for (String val : dataLine.split(",")) {
+                                data.add(Integer.parseInt(val.trim()));
+                            }
+                            return data;
+                        }
+                    }
+                } catch (IOException | NumberFormatException e) {
+                    Log.e(TAG, "Error reading internal storage data", e);
+                }
+            }
+
+            AssetManager assetManager = requireContext().getAssets();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
+                String savedDate = reader.readLine();
+                if (today.equals(savedDate)) {
+                    String dataLine = reader.readLine();
+                    if (dataLine != null) {
+                        for (String val : dataLine.split(",")) {
+                            data.add(Integer.parseInt(val.trim()));
+                        }
+                        return data;
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                Log.e(TAG, "Error reading asset data", e);
+            }
+
+            return updateElectricityData(filename, today);
+        }
+
+        AssetManager assetManager = requireContext().getAssets();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
             String line = reader.readLine();
             if (line != null)
                 for (String val : line.split(",")) data.add(Integer.parseInt(val.trim()));
@@ -180,6 +227,27 @@ public class HomeFragment extends Fragment {
             if (filename.equals("savings_data.txt")) { data.add(40); data.add(60); data.add(35); }
         }
         return data;
+    }
+
+    private List<Integer> updateElectricityData(String filename, String today) {
+        List<Integer> newData = new ArrayList<>();
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 24; i++) {
+            int val = random.nextInt(21);
+            newData.add(val);
+            sb.append(val);
+            if (i < 23) sb.append(",");
+        }
+
+        File file = new File(requireContext().getFilesDir(), filename);
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
+            writer.println(today);
+            writer.println(sb.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Error updating electricity data file", e);
+        }
+        return newData;
     }
 
     // ── Histogram ─────────────────────────────────────────────────────────────
