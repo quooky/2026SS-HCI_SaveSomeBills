@@ -1,64 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/appColorSurface"
+    android:layout_marginStart="@dimen/spacing_md"
+    android:layout_marginEnd="@dimen/spacing_md"
+    android:layout_marginBottom="@dimen/spacing_sm"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    android:layout_marginBottom="2dp"
-    android:paddingTop="@dimen/spacing_md"
-    android:paddingBottom="@dimen/spacing_md">
+    app:cardBackgroundColor="?attr/appColorSurface"
+    app:cardCornerRadius="@dimen/corner_md"
+    app:cardElevation="@dimen/elevation_sm">
 
-    <TextView
-        android:id="@+id/device_group_icon"
-        android:layout_width="@dimen/icon_button_size"
-        android:layout_height="@dimen/icon_button_size"
-        android:layout_marginStart="@dimen/spacing_md"
-        android:gravity="center"
-        android:text="🏠"
-        android:textAlignment="center"
-        android:textSize="28sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/device_group_name"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_md"
-        android:layout_marginEnd="@dimen/spacing_md"
-        android:text="name"
-        android:textAppearance="?attr/textAppearanceBodyLarge"
-        android:textColor="?attr/appColorOnSurface"
-        app:layout_constraintBottom_toTopOf="@+id/device_group_energy"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/device_group_icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_md">
 
-    <TextView
-        android:id="@+id/device_group_energy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_md"
-        android:text="0"
-        android:textAppearance="?attr/textAppearanceLabelSmall"
-        android:textColor="?attr/appColorOnSurfaceVariant"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/device_group_icon"
-        app:layout_constraintTop_toBottomOf="@+id/device_group_name" />
+        <TextView
+            android:id="@+id/device_group_icon"
+            android:layout_width="@dimen/icon_button_size"
+            android:layout_height="@dimen/icon_button_size"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="🏠"
+            android:textAlignment="center"
+            android:textSize="28sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/device_group_unit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:text="⌀ e/m"
-        android:textAppearance="?attr/textAppearanceLabelSmall"
-        android:textColor="?attr/appColorOnSurfaceVariant"
-        app:layout_constraintStart_toEndOf="@+id/device_group_energy"
-        app:layout_constraintTop_toTopOf="@+id/device_group_energy" />
+        <TextView
+            android:id="@+id/device_group_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:text="name"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="?attr/appColorOnSurface"
+            app:layout_constraintBottom_toTopOf="@+id/device_group_energy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/device_group_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/device_group_energy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:text="0"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/appColorOnSurfaceVariant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/device_group_icon"
+            app:layout_constraintTop_toBottomOf="@+id/device_group_name" />
+
+        <TextView
+            android:id="@+id/device_group_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:text="⌀ e/m"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/appColorOnSurfaceVariant"
+            app:layout_constraintStart_toEndOf="@+id/device_group_energy"
+            app:layout_constraintTop_toTopOf="@+id/device_group_energy" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
