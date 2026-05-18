@@ -43,9 +43,11 @@ public class ListDeviceFragment extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack()
         );
 
-        view.findViewById(R.id.fab_add_device).setOnClickListener(v ->
-            startActivity(new Intent(getActivity(), AddDevice.class))
-        );
+        view.findViewById(R.id.fab_add_device).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), AddDevice.class);
+            intent.putExtra(AddDevice.EXTRA_PRESELECT_ROOM, groupId);
+            startActivity(intent);
+        });
 
         RecyclerView recyclerView = view.findViewById(R.id.list_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

@@ -21,11 +21,8 @@ public class MainActivity extends AppCompatActivity {
             if (id == R.id.nav_home) {
                 loadFragment(new GroupDeviceFragment());
                 return true;
-            } else if (id == R.id.nav_favorites) {
-                loadFragment(new HomeFragment());
-                return true;
             } else if (id == R.id.nav_profile) {
-                loadFragment(new ProfileFragment());
+                loadFragment(new HomeFragment());
                 return true;
             } else if (id == R.id.nav_tips) {
                 loadFragment(new TipsFragment());
@@ -36,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (savedInstanceState == null) {
-            bottomNav.setSelectedItemId(R.id.nav_favorites);
+            bottomNav.setSelectedItemId(R.id.nav_profile);
         }
     }
 

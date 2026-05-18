@@ -6,7 +6,7 @@
         <item name="colorOnPrimaryContainer">@color/color_on_primary_container</item>
         <item name="colorSecondary">@color/color_secondary</item>
         <item name="colorOnSecondary">@color/color_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/color_secondary_container</item>
+        <item name="colorSecondaryContainer">@color/teal_40</item>
         <item name="colorOnSecondaryContainer">@color/color_on_secondary_container</item>
         <item name="android:colorBackground">@color/color_background</item>
         <item name="colorSurface">@color/color_surface</item>

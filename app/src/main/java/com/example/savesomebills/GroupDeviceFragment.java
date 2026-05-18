@@ -1,6 +1,7 @@
 package com.example.savesomebills;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -58,6 +59,10 @@ public class GroupDeviceFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.group_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+
+        view.findViewById(R.id.floatingActionButton2).setOnClickListener(v ->
+            startActivity(new Intent(getActivity(), AddDevice.class))
+        );
 
         return view;
     }

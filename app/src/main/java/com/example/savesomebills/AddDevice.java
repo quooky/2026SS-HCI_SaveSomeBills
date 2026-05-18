@@ -32,6 +32,7 @@ import java.util.Random;
 
 public class AddDevice extends AppCompatActivity {
 
+    public  static final String EXTRA_PRESELECT_ROOM = "preselect_room";
     private static final int    REQUEST_CAMERA  = 1001;
     private static final double PRICE_PER_KWH   = 0.30;
     private static final double MAX_COST_DAY    = 3.0;
@@ -76,6 +77,11 @@ public class AddDevice extends AppCompatActivity {
 
         loadRooms();
         setupSpinner();
+
+        String preselect = getIntent().getStringExtra(EXTRA_PRESELECT_ROOM);
+        if (preselect != null && rooms.contains(preselect)) {
+            spinnerRoom.setSelection(rooms.indexOf(preselect) + 1); // +1 for placeholder
+        }
 
         TextWatcher watcher = new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
