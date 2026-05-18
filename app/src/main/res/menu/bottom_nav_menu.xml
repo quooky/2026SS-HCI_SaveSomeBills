@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_home"
-        android:icon="@drawable/ic_home"
-        android:title="Home" />
-    <item
-        android:id="@+id/nav_favorites"
-        android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:icon="@drawable/ic_list"
+        android:title="Geräte" />
+
     <item
         android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_account_box"
-        android:title="Profile" />
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_tips"
+        android:icon="@drawable/ic_tips"
+        android:title="Tipps" />
+
 </menu>

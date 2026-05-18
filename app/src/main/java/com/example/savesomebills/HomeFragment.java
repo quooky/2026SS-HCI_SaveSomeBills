@@ -36,24 +36,27 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         LinearLayout histogramContainer = view.findViewById(R.id.histogram_container);
-        if (histogramContainer != null) {
-            List<Integer> data = loadData("savings_data.txt");
-            populateHistogram(histogramContainer, data);
-            setupThresholdLine(view);
-        }
-
         LinearLayout electricityContainer = view.findViewById(R.id.electricity_graph_container);
-        if (electricityContainer != null) {
-            List<Integer> data = loadData("electricity_prices.txt");
-            populateElectricityGraph(electricityContainer, data);
-            displayCheapestHours(view, data);
-        }
-
         PieChartView pieChartView = view.findViewById(R.id.pie_chart_view);
         LinearLayout legendContainer = view.findViewById(R.id.pie_legend_container);
-        if (pieChartView != null && legendContainer != null) {
-            loadAndPopulatePieChart(pieChartView, legendContainer);
-        }
+
+        List<Integer> histData = loadData("savings_data.txt");
+        List<Integer> elecData = loadData("electricity_prices.txt");
+
+        // Defer until views are measured so we can use actual heights
+        view.post(() -> {
+            if (histogramContainer != null) {
+                populateHistogram(histogramContainer, histData, histogramContainer.getHeight());
+                setupThresholdLine(view, histogramContainer.getHeight());
+            }
+            if (electricityContainer != null) {
+                populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
+                displayCheapestHours(view, elecData);
+            }
+            if (pieChartView != null && legendContainer != null) {
+                loadAndPopulatePieChart(pieChartView, legendContainer);
+            }
+        });
 
         return view;
     }
@@ -120,7 +123,7 @@ public class HomeFragment extends Fragment {
         textView.setText(label);
         textView.setTextSize(12);
         textView.setPadding((int)(8 * density), 0, 0, 0);
-        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_40));
+        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
 
         item.addView(colorBox);
         item.addView(textView);
@@ -168,15 +171,14 @@ public class HomeFragment extends Fragment {
         return data;
     }
 
-    private void setupThresholdLine(View view) {
+    private void setupThresholdLine(View view, int containerHeightPx) {
         View thresholdLine = view.findViewById(R.id.threshold_line);
         TextView thresholdLabel = view.findViewById(R.id.threshold_label);
 
         if (thresholdLine != null && thresholdLabel != null) {
             float density = getResources().getDisplayMetrics().density;
-            int containerHeightPx = (int) (150 * density);
             int labelHeightReserved = (int) (20 * density);
-            
+
             int thresholdMarginPx = (int) ((THRESHOLD / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
 
             ViewGroup.MarginLayoutParams lineParams = (ViewGroup.MarginLayoutParams) thresholdLine.getLayoutParams();
@@ -190,10 +192,9 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void populateHistogram(LinearLayout container, List<Integer> data) {
+    private void populateHistogram(LinearLayout container, List<Integer> data, int containerHeightPx) {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
-        int containerHeightPx = (int) (150 * density);
 
         for (Integer value : data) {
             LinearLayout binContainer = new LinearLayout(getContext());
@@ -207,37 +208,36 @@ public class HomeFragment extends Fragment {
             valueLabel.setText(String.valueOf(value));
             valueLabel.setTextSize(11);
             valueLabel.setGravity(Gravity.CENTER_HORIZONTAL);
-            valueLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_40));
+            valueLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
             binContainer.addView(valueLabel);
 
             View bar = new View(getContext());
             int labelHeightReserved = (int) (20 * density);
             int barHeightPx = (int) ((value / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
-            
+
             LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, barHeightPx);
             bar.setLayoutParams(barParams);
 
             int colorRes = (value >= THRESHOLD) ? R.color.green_40 : R.color.red_40;
             bar.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes));
-            
+
             binContainer.addView(bar);
             container.addView(binContainer);
         }
     }
 
-    private void populateElectricityGraph(LinearLayout container, List<Integer> data) {
+    private void populateElectricityGraph(LinearLayout container, List<Integer> data, int containerHeightPx) {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
-        int containerHeightPx = (int) (120 * density);
 
         for (Integer value : data) {
             View bar = new View(getContext());
             int barHeightPx = (int) ((value / (float) MAX_ELEC_PRICE) * containerHeightPx);
-            
+
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, barHeightPx, 1.0f);
             params.setMargins((int) (1 * density), 0, (int) (1 * density), 0);
             bar.setLayoutParams(params);
-            
+
             int color;
             if (value < 10) {
                 color = ContextCompat.getColor(requireContext(), R.color.green_40);
@@ -247,7 +247,7 @@ public class HomeFragment extends Fragment {
                 color = ContextCompat.getColor(requireContext(), R.color.amber_40);
             }
             bar.setBackgroundColor(color);
-            
+
             container.addView(bar);
         }
     }

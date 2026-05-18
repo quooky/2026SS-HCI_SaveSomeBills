@@ -36,10 +36,13 @@ android {
 }
 
 dependencies {
+    implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.fragment)
+    implementation(libs.recyclerview)
+    implementation(libs.viewpager2)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
