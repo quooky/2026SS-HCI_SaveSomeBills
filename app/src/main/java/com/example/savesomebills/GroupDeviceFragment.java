@@ -1,5 +1,6 @@
 package com.example.savesomebills;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,26 +35,26 @@ public class GroupDeviceFragment extends Fragment {
         View view = inflater.inflate(R.layout.list_device_group, container, false);
 
         SharedPreferences prefs = requireActivity()
-            .getSharedPreferences(PREFS_GROUP_ICONS, Context.MODE_PRIVATE);
+                .getSharedPreferences(PREFS_GROUP_ICONS, Context.MODE_PRIVATE);
 
         List<Group> groups = buildGroups(prefs);
 
         GroupViewAdapter adapter = new GroupViewAdapter(groups);
 
         adapter.setOnGroupClickListener(groupId ->
-            requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, ListDeviceFragment.newInstance(groupId))
-                .addToBackStack(null)
-                .commit()
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, ListDeviceFragment.newInstance(groupId))
+                        .addToBackStack(null)
+                        .commit()
         );
 
         adapter.setOnIconClickListener((position, groupId) ->
-            EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
-                prefs.edit().putString("icon_" + groupId, emoji).apply();
-                groups.get(position).setIcon(emoji);
-                adapter.notifyItemChanged(position);
-            })
+                EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
+                    prefs.edit().putString("icon_" + groupId, emoji).apply();
+                    groups.get(position).setIcon(emoji);
+                    adapter.notifyItemChanged(position);
+                })
         );
 
         RecyclerView recyclerView = view.findViewById(R.id.group_recycle_view);
@@ -61,7 +62,15 @@ public class GroupDeviceFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         view.findViewById(R.id.floatingActionButton2).setOnClickListener(v ->
-            startActivity(new Intent(getActivity(), AddDevice.class))
+                startActivity(new Intent(getActivity(), AddDevice.class))
+        );
+
+        view.findViewById(R.id.imageButton).setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Meine Gruppen")
+                        .setMessage("Hier siehst du deine Räume oder Gruppen. Der Wert zeigt den gesamten Verbrauch aller Geräte in dieser Gruppe. Tippe auf eine Gruppe, um die einzelnen Geräte zu sehen.")
+                        .setPositiveButton("OK", null)
+                        .show()
         );
 
         return view;
