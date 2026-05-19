@@ -24,6 +24,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
@@ -47,7 +48,8 @@ public class AddDevice extends AppCompatActivity {
 
     private Spinner              spinnerRoom;
     private TextInputEditText    inputName, inputOnHours, inputStandbyHours;
-    private TextInputEditText    inputWattOn, inputWattStandby;
+    private Slider               sliderWattOn, sliderWattStandby;
+    private TextView             tvWattOnValue, tvWattStandbyValue;
     private TextView             tvCostPerHour, tvDeviceIcon, tvTitle;
     private View                 gradientBarContainer, gradientBarIndicator;
     private MaterialButton       btnCancel;
@@ -72,8 +74,10 @@ public class AddDevice extends AppCompatActivity {
         inputName            = findViewById(R.id.input_name);
         inputOnHours         = findViewById(R.id.input_on_hours);
         inputStandbyHours    = findViewById(R.id.input_standby_hours);
-        inputWattOn          = findViewById(R.id.input_watt_on);
-        inputWattStandby     = findViewById(R.id.input_watt_standby);
+        sliderWattOn         = findViewById(R.id.slider_watt_on);
+        sliderWattStandby    = findViewById(R.id.slider_watt_standby);
+        tvWattOnValue        = findViewById(R.id.tv_watt_on_value);
+        tvWattStandbyValue   = findViewById(R.id.tv_watt_standby_value);
         layoutWattManual     = findViewById(R.id.layout_watt_manual);
         tvWattChevron        = findViewById(R.id.tv_watt_chevron);
         findViewById(R.id.header_watt_manual).setOnClickListener(v -> {
@@ -121,11 +125,15 @@ public class AddDevice extends AppCompatActivity {
             wattOn      = editDevice.wattOn;
             wattStandby = editDevice.wattStandby;
             if (wattOn > 0) {
-                inputWattOn.setText(String.valueOf(wattOn));
+                sliderWattOn.setValue(Math.min(wattOn, 2000));
+                tvWattOnValue.setText(wattOn + " W");
                 layoutWattManual.setVisibility(View.VISIBLE);
                 tvWattChevron.setText("▼");
             }
-            if (wattStandby > 0) inputWattStandby.setText(String.valueOf(wattStandby));
+            if (wattStandby > 0) {
+                sliderWattStandby.setValue(Math.min(wattStandby, 100));
+                tvWattStandbyValue.setText(wattStandby + " W");
+            }
             if (rooms.contains(editDevice.groupId)) {
                 spinnerRoom.setSelection(rooms.indexOf(editDevice.groupId) + 1);
             }
@@ -180,25 +188,16 @@ public class AddDevice extends AppCompatActivity {
                 updateForecast();
             }
         });
-        // Watt ON field
-        inputWattOn.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
-            public void onTextChanged(CharSequence s, int i, int b, int c) {}
-            public void afterTextChanged(Editable s) {
-                String t = s.toString().trim();
-                wattOn = t.isEmpty() ? 0 : Integer.parseInt(t);
-                updateForecast();
-            }
+        // Watt sliders
+        sliderWattOn.addOnChangeListener((slider, value, fromUser) -> {
+            wattOn = (int) value;
+            tvWattOnValue.setText((int) value + " W");
+            updateForecast();
         });
-        // Watt Standby field
-        inputWattStandby.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
-            public void onTextChanged(CharSequence s, int i, int b, int c) {}
-            public void afterTextChanged(Editable s) {
-                String t = s.toString().trim();
-                wattStandby = t.isEmpty() ? 0 : Integer.parseInt(t);
-                updateForecast();
-            }
+        sliderWattStandby.addOnChangeListener((slider, value, fromUser) -> {
+            wattStandby = (int) value;
+            tvWattStandbyValue.setText((int) value + " W");
+            updateForecast();
         });
 
         findViewById(R.id.imageButton3).setOnClickListener(v -> finish());
@@ -354,8 +353,12 @@ public class AddDevice extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             Random random = new Random();
-            inputWattOn.setText(String.valueOf(10 + random.nextInt(491)));
-            inputWattStandby.setText(String.valueOf(1 + random.nextInt(20)));
+            int scannedOn      = 10 + random.nextInt(491);
+            int scannedStandby = 1  + random.nextInt(20);
+            sliderWattOn.setValue(Math.min(scannedOn, 2000));
+            sliderWattStandby.setValue(Math.min(scannedStandby, 100));
+            tvWattOnValue.setText(scannedOn + " W");
+            tvWattStandbyValue.setText(scannedStandby + " W");
             layoutWattManual.setVisibility(View.VISIBLE);
             tvWattChevron.setText("▼");
         }

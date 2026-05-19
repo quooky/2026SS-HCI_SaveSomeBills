@@ -49,15 +49,20 @@
         app:layout_constraintTop_toBottomOf="@id/imageButton3" />
 
     <!-- Content -->
-    <LinearLayout
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_md"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/bottom_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_title">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
 
         <!-- Icon picker row -->
         <LinearLayout
@@ -218,88 +223,6 @@
                 android:textColorHint="?attr/appColorOnSurfaceVariant" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Manuelle Watt Angabe (collapsible) -->
-        <LinearLayout
-            android:id="@+id/header_watt_manual"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Manuelle Watt Angabe"
-                android:textAppearance="?attr/textAppearanceBodyLarge"
-                android:textColor="?attr/appColorOnSurface" />
-
-            <TextView
-                android:id="@+id/tv_watt_chevron"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="▶"
-                android:textColor="?attr/appColorOnSurfaceVariant"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_watt_manual"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_sm"
-                android:layout_weight="1"
-                app:boxBackgroundColor="?attr/appColorSurface"
-                app:boxStrokeColor="@color/input_stroke"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_watt_on"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="W aktiv"
-                    android:inputType="number"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/appColorOnSurface"
-                    android:textColorHint="?attr/appColorOnSurfaceVariant" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_sm"
-                android:layout_weight="1"
-                app:boxBackgroundColor="?attr/appColorSurface"
-                app:boxStrokeColor="@color/input_stroke"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_watt_standby"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="W Standby"
-                    android:inputType="number"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:textColor="?attr/appColorOnSurface"
-                    android:textColorHint="?attr/appColorOnSurfaceVariant" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
-
         <!-- EasyScan button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_easy_scan"
@@ -385,7 +308,126 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Manuelle Watt Angabe (collapsible) -->
+        <LinearLayout
+            android:id="@+id/header_watt_manual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Manuelle Watt Angabe"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/appColorOnSurface" />
+
+            <TextView
+                android:id="@+id/tv_watt_chevron"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▶"
+                android:textColor="?attr/appColorOnSurfaceVariant"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_watt_manual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- W aktiv slider -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="W aktiv"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/appColorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/tv_watt_on_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 W"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/appColorAccent"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_watt_on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="2000"
+                android:stepSize="5"
+                android:value="0"
+                app:thumbColor="?attr/appColorAccent"
+                app:trackColorActive="?attr/appColorAccent"
+                app:trackColorInactive="?attr/appColorOutline" />
+
+            <!-- W Standby slider -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="W Standby"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/appColorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/tv_watt_standby_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 W"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/appColorAccent"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_watt_standby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0"
+                android:valueTo="100"
+                android:stepSize="1"
+                android:value="0"
+                app:thumbColor="?attr/appColorAccent"
+                app:trackColorActive="?attr/appColorAccent"
+                app:trackColorInactive="?attr/appColorOutline" />
+
+        </LinearLayout>
+
     </LinearLayout>
+
+    </ScrollView>
 
     <!-- Bottom buttons -->
     <LinearLayout
