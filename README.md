@@ -1,14 +1,14 @@
 ## Readme - M3
 
-* Gruppe:	1
+* Gruppe: 1
 * Team-Nr.: 113
 * Projektthema: Save some Bills
 
 ### Implementierung
 
-Framework:	Android
+Framework: Android
 
-API-Version:	Android API-Level 36 
+API-Version: Android API-Level 36
 
 Gerät(e), auf dem(denen) getestet wurde:
 Pixel 6
@@ -21,4 +21,3 @@ Dauer der Entwicklung:
 
 Weitere Anmerkungen:
 
- 
