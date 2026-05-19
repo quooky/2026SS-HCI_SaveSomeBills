@@ -3,64 +3,70 @@ package com.example.savesomebills.list_and_group;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.savesomebills.AppSettings;
+import com.example.savesomebills.Device;
 import com.example.savesomebills.R;
+import com.example.savesomebills.SettingsFragment;
 
 import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHolder> {
-    List<Energy_Object> id_list;
 
+    private final List<Device> devices;
+    private OnEditClickListener editListener;
 
-    public ListViewAdapter(List<Energy_Object> id_list) {
-        this.id_list = id_list;
+    public interface OnEditClickListener {
+        void onEditClick(Device device);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView name;
-        TextView icon;
-        TextView energy;
-        TextView unit;
-        Button button;
-        public ViewHolder(@NonNull View view) {
-            super(view);
-            this.name = view.findViewById(R.id.device_list_name);
-            this.icon = view.findViewById(R.id.device_list_icon);
-            this.energy = view.findViewById(R.id.device_list_energy);
-            this.unit = view.findViewById(R.id.device_list_unit);
-            this.button = view.findViewById(R.id.device_list_button);
-        }
-
-        public TextView getName() { return name; }
-        public TextView getIcon() { return icon; }
-        public TextView getEnergy() { return energy; }
-        public TextView getUnit() { return unit; }
-        public Button getButton() { return button; }
+    public void setOnEditClickListener(OnEditClickListener listener) {
+        this.editListener = listener;
     }
 
+    public ListViewAdapter(List<Device> devices) {
+        this.devices = devices;
+    }
 
     @NonNull
     @Override
-    public ListViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_device_list,parent, false);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.layout_device_list, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ListViewAdapter.ViewHolder holder, int position) {
-          Energy_Object ob = id_list.get(position);
-          holder.getName().setText(ob.getName());
-          holder.getEnergy().setText(ob.getEnergy_amount());
-          holder.getIcon().setText(ob.getIcon());
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Device d = devices.get(position);
+        holder.name.setText(d.name);
+        holder.icon.setText(d.icon != null ? d.icon : "⚡"); //d.wattOn + " W"
+        holder.energy.setText(AppSettings.formatEnergy(holder.energy.getContext(), d.wattOn*0.001));
+        holder.editButton.setOnClickListener(v -> {
+            if (editListener != null) editListener.onEditClick(d);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return id_list.size();
+        return devices.size();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView    name, icon, energy;
+        ImageButton editButton;
+
+        public ViewHolder(@NonNull View view) {
+            super(view);
+            name       = view.findViewById(R.id.device_list_name);
+            icon       = view.findViewById(R.id.device_list_icon);
+            energy     = view.findViewById(R.id.device_list_energy);
+            editButton = view.findViewById(R.id.device_list_edit);
+        }
     }
 }

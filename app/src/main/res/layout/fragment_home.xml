@@ -7,14 +7,31 @@
     android:orientation="vertical"
     android:padding="@dimen/spacing_md">
 
-    <TextView
-        android:id="@+id/greeting"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_sm"
-        android:text="@string/greeting"
-        android:textAppearance="?attr/textAppearanceHeadlineMedium"
-        android:textColor="?attr/appColorOnSurface" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/greeting"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/greeting"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="?attr/appColorOnSurface" />
+
+        <ImageButton
+            android:id="@+id/btn_settings"
+            android:layout_width="@dimen/icon_button_size"
+            android:layout_height="@dimen/icon_button_size"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_settings"
+            app:tint="?attr/appColorOnSurfaceVariant" />
+
+    </LinearLayout>
 
     <!-- Sparziel -->
     <com.google.android.material.card.MaterialCardView
@@ -114,6 +131,16 @@
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/appColorOnSurface" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:gravity="bottom"
+                android:paddingStart="0dp"
+                android:paddingEnd="@dimen/spacing_xs"
+                android:text="@string/elec_unit"
+                android:textColor="?attr/appColorOnSurfaceVariant"
+                android:textSize="@dimen/text_xs" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -127,16 +154,6 @@
                     android:layout_height="match_parent"
                     android:gravity="end"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="20dp"
-                        android:gravity="bottom"
-                        android:paddingEnd="@dimen/spacing_xs"
-                        android:paddingStart="0dp"
-                        android:text="@string/elec_unit"
-                        android:textColor="?attr/appColorOnSurfaceVariant"
-                        android:textSize="@dimen/text_xs" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -161,7 +178,9 @@
                     android:layout_marginTop="20dp"
                     android:layout_weight="1"
                     android:gravity="bottom"
-                    android:orientation="horizontal" />
+                    android:orientation="horizontal" >
+
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout

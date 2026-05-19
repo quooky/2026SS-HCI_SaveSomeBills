@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/appColorBackground"
-    android:clipChildren="false">
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_md">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        android:padding="@dimen/spacing_md">
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Wusstest du schon?"
-            android:textAppearance="?attr/textAppearanceHeadlineLarge"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
             android:textColor="?attr/appColorOnSurface"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_lg"
             android:text="Einfache Tipps, um im Alltag Strom zu sparen."
-            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="?attr/appColorOnSurfaceVariant" />
 
-        <!-- Anwendungs-Tipps stack -->
+    </LinearLayout>
+
+    <!-- Anwendungs-Tipps -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:orientation="vertical">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
+            android:layout_marginBottom="@dimen/spacing_xs"
             android:text="💡 Anwendungs-Tipps"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?attr/appColorOnSurface"
             android:textStyle="bold" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager_general"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/tip_card_height"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="@dimen/spacing_xs"
-            android:paddingEnd="@dimen/spacing_xl" />
+            android:paddingEnd="@dimen/spacing_xs" />
 
         <LinearLayout
             android:id="@+id/dots_general"
@@ -52,26 +62,35 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingTop="@dimen/spacing_sm"
-            android:paddingBottom="@dimen/spacing_lg" />
+            android:paddingTop="@dimen/spacing_xs" />
 
-        <!-- Geräte-Tipps stack -->
+    </LinearLayout>
+
+    <!-- Geräte-Tipps -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:orientation="vertical">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
+            android:layout_marginBottom="@dimen/spacing_xs"
             android:text="🔌 Geräte-Tipps"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?attr/appColorOnSurface"
             android:textStyle="bold" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager_device"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/tip_card_height"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="@dimen/spacing_xs"
-            android:paddingEnd="@dimen/spacing_xl" />
+            android:paddingEnd="@dimen/spacing_xs" />
 
         <LinearLayout
             android:id="@+id/dots_device"
@@ -79,8 +98,50 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingTop="@dimen/spacing_sm"
-            android:paddingBottom="@dimen/spacing_md" />
+            android:paddingTop="@dimen/spacing_xs" />
 
     </LinearLayout>
-</ScrollView>
+
+    <!-- Aktions-Tipps -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.4"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_tips_heading"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="?attr/appColorOnSurface"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:text="@string/action_tips_subtitle"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/appColorOnSurfaceVariant" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/pager_action"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/spacing_xs"
+            android:paddingEnd="@dimen/spacing_xs" />
+
+        <LinearLayout
+            android:id="@+id/dots_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/spacing_xs" />
+
+    </LinearLayout>
+
+</LinearLayout>

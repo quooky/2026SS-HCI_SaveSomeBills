@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.savesomebills.list_and_group.Energy_Object;
 import com.example.savesomebills.list_and_group.ListViewAdapter;
 
 import java.util.ArrayList;
@@ -59,16 +58,13 @@ public class ListDeviceFragment extends Fragment {
                         .setTitle("Meine Geräte")
                         .setMessage(
                                 "Hier siehst du alle Geräte in dieser Gruppe.\n\n" +
-
                                         "🔌 Verbrauch\n" +
                                         "• Watt (W) = Stromverbrauch im Betrieb\n" +
                                         "• Mehr Watt = höherer Verbrauch\n\n" +
-
                                         "📊 Einordnung\n" +
                                         "• Klein: 5–100 W\n" +
                                         "• Mittel: 50–200 W\n" +
                                         "• Groß: 300 W+\n\n" +
-
                                         "✏️ Bearbeiten\n" +
                                         "• Stift = Gerät anpassen\n" +
                                         "• Blaues + unten rechts = neues Gerät hinzufügen"
@@ -79,18 +75,22 @@ public class ListDeviceFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.list_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new ListViewAdapter(buildItems(groupId)));
+
+        ListViewAdapter adapter = new ListViewAdapter(buildItems(groupId));
+        adapter.setOnEditClickListener(device -> {
+            Intent intent = new Intent(getActivity(), AddDevice.class);
+            intent.putExtra(AddDevice.EXTRA_EDIT_DEVICE_ID, device.objectId);
+            startActivity(intent);
+        });
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
 
-    private List<Energy_Object> buildItems(String groupId) {
-        List<Energy_Object> items = new ArrayList<>();
-
+    private List<Device> buildItems(String groupId) {
+        List<Device> items = new ArrayList<>();
         for (Device d : DeviceStorage.loadAll(requireContext())) {
-            if (d.groupId.equals(groupId)) {
-                items.add(new Energy_Object(d.icon, d.name, d.wattOn + " W", 0));
-            }
+            if (d.groupId.equals(groupId)) items.add(d);
         }
 
         return items;

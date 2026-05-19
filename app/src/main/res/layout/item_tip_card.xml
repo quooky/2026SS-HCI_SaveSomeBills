@@ -15,8 +15,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:lineSpacingMultiplier="1.4"
-        android:padding="@dimen/spacing_lg"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:padding="@dimen/spacing_md"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
         android:textColor="?attr/appColorOnSurface" />
 
 </com.google.android.material.card.MaterialCardView>

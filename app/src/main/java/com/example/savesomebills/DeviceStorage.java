@@ -23,6 +23,23 @@ public class DeviceStorage {
         writeAll(context, devices);
     }
 
+    public static void update(Context context, Device device) {
+        List<Device> devices = loadAll(context);
+        for (int i = 0; i < devices.size(); i++) {
+            if (devices.get(i).objectId.equals(device.objectId)) {
+                devices.set(i, device);
+                break;
+            }
+        }
+        writeAll(context, devices);
+    }
+
+    public static void delete(Context context, String objectId) {
+        List<Device> devices = loadAll(context);
+        devices.removeIf(d -> d.objectId.equals(objectId));
+        writeAll(context, devices);
+    }
+
     public static List<Device> loadAll(Context context) {
         List<Device> devices = new ArrayList<>();
         try {
