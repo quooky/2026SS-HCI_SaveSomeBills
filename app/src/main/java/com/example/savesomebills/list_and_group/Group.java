@@ -7,10 +7,10 @@ public class Group {
     List<Integer> id;
     String icon;
     String name;
-    String energy_amount;
+    int energy_amount;
     int groupid;
 
-    public Group(List<Integer> id, String icon, String name, String energy_amount,int groupid) {
+    public Group(List<Integer> id, String icon, String name, int energy_amount,int groupid) {
         this.id = id;
 
         this.icon = icon;
@@ -39,7 +39,7 @@ public class Group {
         return name;
     }
 
-    public String getEnergy_amount() {
+    public int getEnergy_amount() {
         return energy_amount;
     }
 }

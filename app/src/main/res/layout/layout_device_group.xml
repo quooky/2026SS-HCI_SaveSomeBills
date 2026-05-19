@@ -67,7 +67,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_sm"
-            android:text="⌀ e/m"
             android:textAppearance="?attr/textAppearanceLabelSmall"
             android:textColor="?attr/appColorOnSurfaceVariant"
             app:layout_constraintStart_toEndOf="@+id/device_group_energy"

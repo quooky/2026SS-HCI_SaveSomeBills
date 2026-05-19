@@ -9,8 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.savesomebills.AppSettings;
 import com.example.savesomebills.Device;
 import com.example.savesomebills.R;
+import com.example.savesomebills.SettingsFragment;
 
 import java.util.List;
 
@@ -43,8 +45,8 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Device d = devices.get(position);
         holder.name.setText(d.name);
-        holder.icon.setText(d.icon != null ? d.icon : "⚡");
-        holder.energy.setText(d.wattOn + " W");
+        holder.icon.setText(d.icon != null ? d.icon : "⚡"); //d.wattOn + " W"
+        holder.energy.setText(AppSettings.formatEnergy(holder.energy.getContext(), d.wattOn*0.001));
         holder.editButton.setOnClickListener(v -> {
             if (editListener != null) editListener.onEditClick(d);
         });
