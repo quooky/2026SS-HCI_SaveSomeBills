@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/appColorBackground"
+    android:clipChildren="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Wusstest du schon?"
+            android:textAppearance="?attr/textAppearanceHeadlineLarge"
+            android:textColor="?attr/appColorOnSurface"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_lg"
+            android:text="Einfache Tipps, um im Alltag Strom zu sparen."
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/appColorOnSurfaceVariant" />
+
+        <!-- Anwendungs-Tipps stack -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:text="💡 Anwendungs-Tipps"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/appColorOnSurface"
+            android:textStyle="bold" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/pager_general"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tip_card_height"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/spacing_xs"
+            android:paddingEnd="@dimen/spacing_xl" />
+
+        <LinearLayout
+            android:id="@+id/dots_general"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/spacing_lg" />
+
+        <!-- Geräte-Tipps stack -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:text="🔌 Geräte-Tipps"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/appColorOnSurface"
+            android:textStyle="bold" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/pager_device"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tip_card_height"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/spacing_xs"
+            android:paddingEnd="@dimen/spacing_xl" />
+
+        <LinearLayout
+            android:id="@+id/dots_device"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingBottom="@dimen/spacing_md" />
+
+    </LinearLayout>
+</ScrollView>

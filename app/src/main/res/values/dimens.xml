@@ -30,6 +30,12 @@
     <dimen name="corner_xl">24dp</dimen>
     <dimen name="corner_full">100dp</dimen>
 
+    <!-- ── Component sizes ───────────────────────────────────────────── -->
+    <dimen name="icon_button_size">48dp</dimen>
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="gradient_bar_height">24dp</dimen>
+    <dimen name="tip_card_height">200dp</dimen>
+
     <!-- ── Elevation ──────────────────────────────────────────────────── -->
     <dimen name="elevation_sm">2dp</dimen>
     <dimen name="elevation_md">4dp</dimen>
