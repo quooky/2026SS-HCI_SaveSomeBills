@@ -15,11 +15,18 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class HomeFragment extends Fragment {
 
@@ -40,8 +47,8 @@ public class HomeFragment extends Fragment {
         PieChartView pieChartView = view.findViewById(R.id.pie_chart_view);
         LinearLayout legendContainer = view.findViewById(R.id.pie_legend_container);
 
-        List<Integer> histData = loadData("savings_data.txt");
-        List<Integer> elecData = loadData("electricity_prices.txt");
+        List<Integer> histData = loadData("savings_data.txt", false);
+        List<Integer> elecData = loadData("electricity_prices.txt", true);
 
         // Defer until views are measured so we can use actual heights
         view.post(() -> {
@@ -84,10 +91,10 @@ public class HomeFragment extends Fragment {
                     sumOfFirstFour += value;
                     int color = colors[count % colors.length];
                     entries.add(new PieChartView.PieEntry(label, value, color));
-                    
+
                     // Add to legend
                     addLegendItem(legendContainer, label, color);
-                    
+
                     count++;
                 }
             }
@@ -115,14 +122,14 @@ public class HomeFragment extends Fragment {
 
         View colorBox = new View(getContext());
         float density = getResources().getDisplayMetrics().density;
-        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams((int)(12 * density), (int)(12 * density));
+        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams((int) (12 * density), (int) (12 * density));
         colorBox.setLayoutParams(boxParams);
         colorBox.setBackgroundColor(color);
 
         TextView textView = new TextView(getContext());
         textView.setText(label);
         textView.setTextSize(12);
-        textView.setPadding((int)(8 * density), 0, 0, 0);
+        textView.setPadding((int) (8 * density), 0, 0, 0);
         textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
 
         item.addView(colorBox);
@@ -150,8 +157,48 @@ public class HomeFragment extends Fragment {
         cheapestText.setText(getString(R.string.cheapest_hours_label, timeRange));
     }
 
-    private List<Integer> loadData(String filename) {
+    private List<Integer> loadData(String filename, boolean checkDate) {
         List<Integer> data = new ArrayList<>();
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+        if (checkDate) {
+            File file = new File(requireContext().getFilesDir(), filename);
+            if (file.exists()) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+                    String savedDate = reader.readLine();
+                    if (today.equals(savedDate)) {
+                        String dataLine = reader.readLine();
+                        if (dataLine != null) {
+                            for (String val : dataLine.split(",")) {
+                                data.add(Integer.parseInt(val.trim()));
+                            }
+                            return data;
+                        }
+                    }
+                } catch (IOException | NumberFormatException e) {
+                    Log.e(TAG, "Error reading internal storage data", e);
+                }
+            }
+
+            AssetManager assetManager = requireContext().getAssets();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
+                String savedDate = reader.readLine();
+                if (today.equals(savedDate)) {
+                    String dataLine = reader.readLine();
+                    if (dataLine != null) {
+                        for (String val : dataLine.split(",")) {
+                            data.add(Integer.parseInt(val.trim()));
+                        }
+                        return data;
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                Log.e(TAG, "Error reading asset data", e);
+            }
+
+            return updateElectricityData(filename, today);
+        }
+
         AssetManager assetManager = requireContext().getAssets();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
             String line = reader.readLine();
@@ -163,12 +210,34 @@ public class HomeFragment extends Fragment {
             }
         } catch (IOException | NumberFormatException e) {
             Log.e(TAG, "Error loading data from " + filename, e);
-            // Default values if file missing
             if (filename.equals("savings_data.txt")) {
-                data.add(40); data.add(60); data.add(35);
+                data.add(40);
+                data.add(60);
+                data.add(35);
             }
         }
         return data;
+    }
+
+    private List<Integer> updateElectricityData(String filename, String today) {
+        List<Integer> newData = new ArrayList<>();
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 24; i++) {
+            int val = random.nextInt(21);
+            newData.add(val);
+            sb.append(val);
+            if (i < 23) sb.append(",");
+        }
+
+        File file = new File(requireContext().getFilesDir(), filename);
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
+            writer.println(today);
+            writer.println(sb);
+        } catch (IOException e) {
+            Log.e(TAG, "Error updating electricity data file", e);
+        }
+        return newData;
     }
 
     private void setupThresholdLine(View view, int containerHeightPx) {
