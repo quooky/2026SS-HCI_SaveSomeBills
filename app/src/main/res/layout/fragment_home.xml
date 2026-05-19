@@ -154,14 +154,26 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/electricity_graph_container"
+                <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="20dp"
-                    android:layout_weight="1"
-                    android:gravity="bottom"
-                    android:orientation="horizontal" />
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/electricity_graph_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="bottom"
+                        android:orientation="horizontal" />
+
+                    <View
+                        android:id="@+id/current_time_line"
+                        android:layout_width="2dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/amber_40"
+                        android:visibility="gone" />
+                </FrameLayout>
             </LinearLayout>
 
             <LinearLayout

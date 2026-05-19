@@ -45,6 +45,8 @@ public class HomeFragment extends Fragment {
     private static final int MAX_VALUE = 100;
     private static final int MAX_ELEC_PRICE = 20;
 
+    private Integer firstCheapestHour;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -209,19 +211,25 @@ public class HomeFragment extends Fragment {
         TextView cheapestText = view.findViewById(R.id.cheapest_hours_text);
         if (cheapestText == null || data == null || data.size() < 3) return;
 
+        if (firstCheapestHour == null) setFirstCheapestHour(data);
+
+        String timeRange = String.format(Locale.getDefault(), "%02d:00 - %02d:00", firstCheapestHour, firstCheapestHour + 3);
+        cheapestText.setText(getString(R.string.cheapest_hours_label, timeRange));
+    }
+
+    private void setFirstCheapestHour(List<Integer> data) {
         int minSum = Integer.MAX_VALUE;
         int startIndex = 0;
 
         for (int i = 0; i <= data.size() - 3; i++) {
             int currentSum = data.get(i) + data.get(i + 1) + data.get(i + 2);
-            if (currentSum < minSum) {
+            if (currentSum <= minSum) {
                 minSum = currentSum;
                 startIndex = i;
             }
         }
 
-        String timeRange = String.format(Locale.getDefault(), "%02d:00 - %02d:00", startIndex, startIndex + 3);
-        cheapestText.setText(getString(R.string.cheapest_hours_label, timeRange));
+        firstCheapestHour = startIndex;
     }
 
     private List<Integer> loadData(String filename, boolean checkDate) {
@@ -230,25 +238,7 @@ public class HomeFragment extends Fragment {
 
         if (checkDate) {
             File file = new File(requireContext().getFilesDir(), filename);
-            if (file.exists()) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
-                    String savedDate = reader.readLine();
-                    if (today.equals(savedDate)) {
-                        String dataLine = reader.readLine();
-                        if (dataLine != null) {
-                            for (String val : dataLine.split(",")) {
-                                data.add(Integer.parseInt(val.trim()));
-                            }
-                            return data;
-                        }
-                    }
-                } catch (IOException | NumberFormatException e) {
-                    Log.e(TAG, "Error reading internal storage data", e);
-                }
-            }
-
-            AssetManager assetManager = requireContext().getAssets();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 String savedDate = reader.readLine();
                 if (today.equals(savedDate)) {
                     String dataLine = reader.readLine();
@@ -260,7 +250,7 @@ public class HomeFragment extends Fragment {
                     }
                 }
             } catch (IOException | NumberFormatException e) {
-                Log.e(TAG, "Error reading asset data", e);
+                Log.e(TAG, "Error reading internal storage data", e);
             }
 
             return updateElectricityData(filename, today);
@@ -411,21 +401,19 @@ public class HomeFragment extends Fragment {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
 
-        for (Integer value : data) {
+        for (int i = 0; i < data.size(); i++) {
             View bar = new View(getContext());
-            int barHeightPx = (int) ((value / (float) MAX_ELEC_PRICE) * containerHeightPx);
+            int barHeightPx = (int) ((data.get(i) / (float) MAX_ELEC_PRICE) * containerHeightPx);
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, barHeightPx, 1.0f);
             params.setMargins((int) (1 * density), 0, (int) (1 * density), 0);
             bar.setLayoutParams(params);
-
+            if (firstCheapestHour == null) setFirstCheapestHour(data);
             int color;
-            if (value < 10) {
+            if (i >= firstCheapestHour && i < firstCheapestHour + 3) {
                 color = ContextCompat.getColor(requireContext(), R.color.green_40);
-            } else if (value < 15) {
-                color = ContextCompat.getColor(requireContext(), R.color.teal_40);
             } else {
-                color = ContextCompat.getColor(requireContext(), R.color.amber_40);
+                color = ContextCompat.getColor(requireContext(), R.color.teal_40);
             }
             bar.setBackgroundColor(color);
 
