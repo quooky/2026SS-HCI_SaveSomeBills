@@ -1,23 +1,23 @@
 ## Readme - M3
 
-* Gruppe: 1
-* Team-Nr.: 113
-* Projektthema: Save some Bills
+* Gruppe:	1
+* Team-Nr.: 
+* Projektthema:
 
 ### Implementierung
 
-Framework: Android
+Framework:	[Android]
 
-API-Version: Android API-Level 36
+API-Version:	[Android API-Level 27-30 | iOS 14 â€¦ ]
 
-Gerät(e), auf dem(denen) getestet wurde:
-Pixel 6
+GerÃ¤t(e), auf dem(denen) getestet wurde:
+[Pixel2, iPhone 8 etc.]
 
 Externe Libraries und Frameworks:
-
+[...]
 
 Dauer der Entwicklung:
-40 Stunden
+[XX Stunden]
 
 Weitere Anmerkungen:
-
+[...]
