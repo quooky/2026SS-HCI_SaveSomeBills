@@ -7,14 +7,32 @@
     android:orientation="vertical"
     android:padding="@dimen/spacing_md">
 
-    <TextView
-        android:id="@+id/greeting"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/spacing_sm"
-        android:text="@string/greeting"
-        android:textAppearance="?attr/textAppearanceHeadlineMedium"
-        android:textColor="?attr/appColorOnSurface" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="@dimen/spacing_sm">
+
+        <TextView
+            android:id="@+id/greeting"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/greeting"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textColor="?attr/appColorOnSurface" />
+
+        <ImageButton
+            android:id="@+id/btn_settings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Settings"
+            android:src="@drawable/ic_settings"
+            android:tint="?attr/appColorOnSurface" />
+
+    </LinearLayout>
 
     <!-- Sparziel -->
     <com.google.android.material.card.MaterialCardView

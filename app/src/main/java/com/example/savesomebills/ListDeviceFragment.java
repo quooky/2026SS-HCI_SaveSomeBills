@@ -22,6 +22,9 @@ public class ListDeviceFragment extends Fragment {
 
     private static final String ARG_GROUP_ID = "group_id";
 
+    private ListViewAdapter adapter;
+    private String groupId;
+
     public static ListDeviceFragment newInstance(String groupId) {
         ListDeviceFragment fragment = new ListDeviceFragment();
         Bundle args = new Bundle();
@@ -38,7 +41,7 @@ public class ListDeviceFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.list_device, container, false);
 
-        String groupId = getArguments() != null
+        groupId = getArguments() != null
                 ? getArguments().getString(ARG_GROUP_ID, "")
                 : "";
 
@@ -76,7 +79,7 @@ public class ListDeviceFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.list_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        ListViewAdapter adapter = new ListViewAdapter(buildItems(groupId));
+        adapter = new ListViewAdapter(buildItems(groupId));
         adapter.setOnEditClickListener(device -> {
             Intent intent = new Intent(getActivity(), AddDevice.class);
             intent.putExtra(AddDevice.EXTRA_EDIT_DEVICE_ID, device.objectId);
@@ -85,6 +88,12 @@ public class ListDeviceFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) adapter.updateData(buildItems(groupId));
     }
 
     private List<Device> buildItems(String groupId) {

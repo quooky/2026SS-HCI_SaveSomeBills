@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHolder> {
 
-    private final List<Device> devices;
+    private List<Device> devices;
     private OnEditClickListener editListener;
 
     public interface OnEditClickListener {
@@ -31,6 +31,11 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
 
     public ListViewAdapter(List<Device> devices) {
         this.devices = devices;
+    }
+
+    public void updateData(List<Device> newDevices) {
+        this.devices = newDevices;
+        notifyDataSetChanged();
     }
 
     @NonNull
