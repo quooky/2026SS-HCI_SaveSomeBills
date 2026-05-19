@@ -1,5 +1,6 @@
 package com.example.savesomebills;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -34,12 +35,15 @@ public class ListDeviceFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.list_device, container, false);
 
-        String groupId = getArguments() != null ? getArguments().getString(ARG_GROUP_ID, "") : "";
+        String groupId = getArguments() != null
+                ? getArguments().getString(ARG_GROUP_ID, "")
+                : "";
 
         view.findViewById(R.id.btn_back).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().popBackStack()
+                requireActivity().getSupportFragmentManager().popBackStack()
         );
 
         view.findViewById(R.id.fab_add_device).setOnClickListener(v -> {
@@ -47,6 +51,30 @@ public class ListDeviceFragment extends Fragment {
             intent.putExtra(AddDevice.EXTRA_PRESELECT_ROOM, groupId);
             startActivity(intent);
         });
+
+        View infoButton = view.findViewById(R.id.btn_info);
+        infoButton.setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Meine Geräte")
+                        .setMessage(
+                                "Hier siehst du alle Geräte in dieser Gruppe.\n\n" +
+
+                                        "🔌 Verbrauch\n" +
+                                        "• Watt (W) = Stromverbrauch im Betrieb\n" +
+                                        "• Mehr Watt = höherer Verbrauch\n\n" +
+
+                                        "📊 Einordnung\n" +
+                                        "• Klein: 5–100 W\n" +
+                                        "• Mittel: 50–200 W\n" +
+                                        "• Groß: 300 W+\n\n" +
+
+                                        "✏️ Bearbeiten\n" +
+                                        "• Stift = Gerät anpassen\n" +
+                                        "• Blaues + unten rechts = neues Gerät hinzufügen"
+                        )
+                        .setPositiveButton("OK", null)
+                        .show()
+        );
 
         RecyclerView recyclerView = view.findViewById(R.id.list_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -67,6 +95,7 @@ public class ListDeviceFragment extends Fragment {
         for (Device d : DeviceStorage.loadAll(requireContext())) {
             if (d.groupId.equals(groupId)) items.add(d);
         }
+
         return items;
     }
 }
