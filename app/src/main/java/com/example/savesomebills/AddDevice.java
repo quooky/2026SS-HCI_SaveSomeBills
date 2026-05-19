@@ -353,7 +353,7 @@ public class AddDevice extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             Random random = new Random();
-            int scannedOn      = 10 + random.nextInt(491);
+            int scannedOn      = Math.round((10 + random.nextInt(491)) / 5.0f) * 5;
             int scannedStandby = 1  + random.nextInt(20);
             sliderWattOn.setValue(Math.min(scannedOn, 2000));
             sliderWattStandby.setValue(Math.min(scannedStandby, 100));

@@ -44,7 +44,6 @@ import java.util.stream.Collectors;
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
-    private static final int THRESHOLD = 50;
     private static final int MAX_VALUE = 100;
     private static final int MAX_ELEC_PRICE = 20;
 
@@ -80,9 +79,10 @@ public class HomeFragment extends Fragment {
             if (getActivity() == null) return;
             getActivity().runOnUiThread(() -> {
                 if (getView() == null) return;
+                int threshold = (int) AppSettings.getSavingsGoal(requireContext());
                 if (histogramContainer != null) {
-                    populateHistogram(histogramContainer, histData, histogramContainer.getHeight());
-                    setupThresholdLine(view, histogramContainer.getHeight());
+                    populateHistogram(histogramContainer, histData, histogramContainer.getHeight(), threshold);
+                    setupThresholdLine(view, histogramContainer.getHeight(), threshold);
                 }
                 if (electricityContainer != null) {
                     populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
@@ -427,7 +427,7 @@ public class HomeFragment extends Fragment {
         return newData;
     }
 
-    private void setupThresholdLine(View view, int containerHeightPx) {
+    private void setupThresholdLine(View view, int containerHeightPx, int threshold) {
         View thresholdLine = view.findViewById(R.id.threshold_line);
         TextView thresholdLabel = view.findViewById(R.id.threshold_label);
 
@@ -435,7 +435,7 @@ public class HomeFragment extends Fragment {
             float density = getResources().getDisplayMetrics().density;
             int labelHeightReserved = (int) (20 * density);
 
-            int thresholdMarginPx = (int) ((THRESHOLD / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
+            int thresholdMarginPx = (int) ((threshold / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
 
             ViewGroup.MarginLayoutParams lineParams = (ViewGroup.MarginLayoutParams) thresholdLine.getLayoutParams();
             lineParams.bottomMargin = thresholdMarginPx;
@@ -444,11 +444,11 @@ public class HomeFragment extends Fragment {
             ViewGroup.MarginLayoutParams labelParams = (ViewGroup.MarginLayoutParams) thresholdLabel.getLayoutParams();
             labelParams.bottomMargin = thresholdMarginPx + (int) (2 * density);
             thresholdLabel.setLayoutParams(labelParams);
-            thresholdLabel.setText(String.valueOf(THRESHOLD));
+            thresholdLabel.setText(String.valueOf(threshold));
         }
     }
 
-    private void populateHistogram(LinearLayout container, List<Integer> data, int containerHeightPx) {
+    private void populateHistogram(LinearLayout container, List<Integer> data, int containerHeightPx, int threshold) {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
 
@@ -474,7 +474,7 @@ public class HomeFragment extends Fragment {
             LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, barHeightPx);
             bar.setLayoutParams(barParams);
 
-            int colorRes = (value >= THRESHOLD) ? R.color.green_40 : R.color.red_40;
+            int colorRes = (value >= threshold) ? R.color.green_40 : R.color.red_40;
             bar.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes));
 
             binContainer.addView(bar);
