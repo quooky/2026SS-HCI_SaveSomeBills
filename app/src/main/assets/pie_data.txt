@@ -1,4 +1,0 @@
-Beleuchtung,30
-Laptop,15
-Waschmaschine,25
-Kühlschrank,10

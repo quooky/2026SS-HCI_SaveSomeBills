@@ -9,7 +9,7 @@
     <string name="threshold_value">50</string>
     <string name="max_value">100</string>
     <string name="min_value">0</string>
-    <string name="savings_target">Sparziel: 50 €</string>
+    <string name="savings_target">Monatliches Sparziel: 50 €</string>
     <string name="greeting">Servus!</string>
     <string name="electricity_prices_today">Happy Hours</string>
     <string name="elec_unit">cent/kWh</string>
@@ -18,7 +18,8 @@
     <string name="mid_elec_value">10</string>
     <string name="low_elec_value">5</string>
     <string name="cheapest_hours_label">Günstigste Zeit heute: %1$s</string>
-    <string name="energy_distribution">Geräteverbrauch</string>
+    <string name="energy_distribution_devices">Geräteverbrauch</string>
+    <string name="energy_distribution_groups">Gruppenverbrauch</string>
     <string name="category_1">Category 1</string>
     <string name="category_2">Category 2</string>
     <string name="category_3">Category 3</string>

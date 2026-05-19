@@ -1,19 +1,26 @@
 package com.example.savesomebills;
 
 import android.content.res.AssetManager;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,158 +29,284 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
 
-    private static final String TAG          = "HomeFragment";
-    private static final int    MAX_VALUE    = 100;
-    private static final int    MAX_ELEC_PRICE = 20;
+    private static final String TAG = "HomeFragment";
+    private static final int THRESHOLD = 50;
+    private static final int MAX_VALUE = 100;
+    private static final int MAX_ELEC_PRICE = 20;
 
-    private View rootView;
+    private Integer firstCheapestHour;
+
+    private View currentTimeLine;
+    private FrameLayout graphContainer;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        rootView.findViewById(R.id.btn_settings).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SettingsFragment())
-                .addToBackStack(null)
-                .commit()
-        );
+        LinearLayout histogramContainer = view.findViewById(R.id.histogram_container);
+        LinearLayout electricityContainer = view.findViewById(R.id.electricity_graph_container);
+        ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
+        LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
-        return rootView;
+        // Load data in background to avoid NetworkOnMainThreadException
+        new Thread(() -> {
+            List<Integer> histData = loadData("savings_data.txt", false);
+            List<Integer> elecData = loadData("electricity_prices.txt", true);
+
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                if (getView() == null) return;
+                if (histogramContainer != null) {
+                    populateHistogram(histogramContainer, histData, histogramContainer.getHeight());
+                    setupThresholdLine(view, histogramContainer.getHeight());
+                }
+                if (electricityContainer != null) {
+                    populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
+                    displayCheapestHours(view, elecData);
+                }
+                if (piePager != null && pieDots != null) {
+                    setupPiePager(piePager, pieDots);
+                }
+            });
+        }).start();
+
+        graphContainer = (FrameLayout) view.findViewById(R.id.electricity_graph_container).getParent();
+        currentTimeLine = view.findViewById(R.id.current_time_line);
+
+        return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        populateCharts();
-    }
-
-    private void populateCharts() {
-        int savingsGoal = (int) AppSettings.getSavingsGoal(requireContext());
-
-        TextView histTitle = rootView.findViewById(R.id.hist_title);
-        if (histTitle != null) {
-            histTitle.setText(getString(R.string.savings_target_format, savingsGoal));
+    private void updateCurrentTimeLine() {
+        if (currentTimeLine == null || graphContainer == null) {
+            return;
         }
 
-        LinearLayout histogramContainer   = rootView.findViewById(R.id.histogram_container);
-        LinearLayout electricityContainer = rootView.findViewById(R.id.electricity_graph_container);
-        PieChartView pieChartView         = rootView.findViewById(R.id.pie_chart_view);
-        LinearLayout legendContainer      = rootView.findViewById(R.id.pie_legend_container);
+        // get current time
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = calendar.get(Calendar.MINUTE);
 
-        List<Integer> histData = loadData("savings_data.txt", false);
-        List<Integer> elecData = loadData("electricity_prices.txt", true);
+        // cast timestamp to float
+        float currentTimeInHours = currentHour + (currentMinute / 60.0f);
 
-        rootView.post(() -> {
-            if (histogramContainer != null) {
-                populateHistogram(histogramContainer, histData, histogramContainer.getHeight(), savingsGoal);
-                setupThresholdLine(rootView, histogramContainer.getHeight(), savingsGoal);
-            }
-            if (electricityContainer != null) {
-                populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
-                displayCheapestHours(rootView, elecData);
-            }
-            if (pieChartView != null && legendContainer != null) {
-                legendContainer.removeAllViews();
-                loadAndPopulatePieChart(pieChartView, legendContainer);
+
+        float minHour = 0.0f;
+        float maxHour = 24.0f;
+
+
+        if (currentTimeInHours < minHour || currentTimeInHours > maxHour) {
+            currentTimeLine.setVisibility(View.GONE);
+            return;
+        }
+
+        // compute the position on a scale form 0 to 1
+        float position = (currentTimeInHours - minHour) / (maxHour - minHour);
+
+        // get the width of the container
+        graphContainer.post(() -> {
+            int containerWidth = graphContainer.getWidth();
+            if (containerWidth > 0) {
+                // compute absolute position on pixels
+                int linePosition = (int) (position * containerWidth);
+
+                // set the horizontal shift for the line
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) currentTimeLine.getLayoutParams();
+                if (params == null) {
+                    params = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                    );
+                }
+                params.leftMargin = linePosition;
+                currentTimeLine.setLayoutParams(params);
+                currentTimeLine.setVisibility(View.VISIBLE);
             }
         });
     }
 
-    // ── Pie chart ─────────────────────────────────────────────────────────────
+    private void setupPiePager(ViewPager2 pager, LinearLayout dotsContainer) {
+        List<Device> devices = DeviceStorage.loadAll(requireContext());
+        if (devices.isEmpty()) return;
 
-    private void loadAndPopulatePieChart(PieChartView pieChartView, LinearLayout legendContainer) {
+        List<PieChartsPagerAdapter.ChartData> chartDataList = new ArrayList<>();
+        
+        chartDataList.add(new PieChartsPagerAdapter.ChartData(
+            getString(R.string.energy_distribution_devices),
+            getIndividualConsumptionEntries(devices)
+        ));
+
+        chartDataList.add(new PieChartsPagerAdapter.ChartData(
+                getString(R.string.energy_distribution_groups),
+            getGroupedConsumptionEntries(devices)
+        ));
+
+        pager.setAdapter(new PieChartsPagerAdapter(chartDataList));
+        setupDots(dotsContainer, chartDataList.size());
+        updateDots(dotsContainer, 0);
+
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                updateDots(dotsContainer, position);
+            }
+        });
+    }
+
+    private List<PieChartView.PieEntry> getIndividualConsumptionEntries(List<Device> devices) {
         List<PieChartView.PieEntry> entries = new ArrayList<>();
-        int[] colors = {
+        int[] colors = getChartColors();
+
+        class DeviceConsumption {
+            String name;
+            float total;
+            DeviceConsumption(String name, float total) {
+                this.name = name;
+                this.total = total;
+            }
+        }
+        List<DeviceConsumption> consumptions = new ArrayList<>();
+        float totalEnergy = 0;
+        for (Device d : devices) {
+            float consumption = (d.onHours * d.wattOn) + (d.standbyHours * d.wattStandby);
+            consumptions.add(new DeviceConsumption(d.name, consumption));
+            totalEnergy += consumption;
+        }
+
+        consumptions.sort((a, b) -> Float.compare(b.total, a.total));
+
+        int displayCount = Math.min(consumptions.size(), 4);
+        float sumOfDisplayed = 0;
+
+        for (int i = 0; i < displayCount; i++) {
+            DeviceConsumption dc = consumptions.get(i);
+            entries.add(new PieChartView.PieEntry(dc.name, dc.total, colors[i % colors.length]));
+            sumOfDisplayed += dc.total;
+        }
+
+        if (consumptions.size() > 4) {
+            float othersValue = totalEnergy - sumOfDisplayed;
+            if (othersValue > 0) {
+                entries.add(new PieChartView.PieEntry(getString(R.string.others), othersValue, colors[4 % colors.length]));
+            }
+        }
+        return entries;
+    }
+
+    private List<PieChartView.PieEntry> getGroupedConsumptionEntries(List<Device> devices) {
+        Map<String, Float> groupMap = new HashMap<>();
+        for (Device d : devices) {
+            float consumption = (d.onHours * d.wattOn) + (d.standbyHours * d.wattStandby);
+            groupMap.put(d.groupId, groupMap.getOrDefault(d.groupId, 0f) + consumption);
+        }
+
+        List<PieChartView.PieEntry> entries = new ArrayList<>();
+        int[] colors = getChartColors();
+        int i = 0;
+        for (Map.Entry<String, Float> entry : groupMap.entrySet()) {
+            entries.add(new PieChartView.PieEntry(entry.getKey(), entry.getValue(), colors[i % colors.length]));
+            i++;
+        }
+        return entries;
+    }
+
+    private int[] getChartColors() {
+        return new int[] {
             ContextCompat.getColor(requireContext(), R.color.green_40),
             ContextCompat.getColor(requireContext(), R.color.teal_40),
             ContextCompat.getColor(requireContext(), R.color.amber_40),
             ContextCompat.getColor(requireContext(), R.color.red_40),
             ContextCompat.getColor(requireContext(), R.color.neutral_40)
         };
-
-        float sumOfFirstFour = 0;
-        int count = 0;
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(requireContext().getAssets().open("pie_data.txt")))) {
-            String line;
-            while (count < 4 && (line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    String label = parts[0];
-                    float value  = Float.parseFloat(parts[1]);
-                    sumOfFirstFour += value;
-                    int color = colors[count % colors.length];
-                    entries.add(new PieChartView.PieEntry(label, value, color));
-                    addLegendItem(legendContainer, label, color);
-                    count++;
-                }
-            }
-        } catch (IOException | NumberFormatException e) {
-            Log.e(TAG, "Error loading pie data", e);
-        }
-
-        float othersValue = 100f - sumOfFirstFour;
-        if (othersValue > 0) {
-            String othersLabel = getString(R.string.others);
-            int othersColor    = colors[count % colors.length];
-            entries.add(new PieChartView.PieEntry(othersLabel, othersValue, othersColor));
-            addLegendItem(legendContainer, othersLabel, othersColor);
-        }
-        pieChartView.setEntries(entries);
     }
 
-    private void addLegendItem(LinearLayout container, String label, int color) {
-        LinearLayout item = new LinearLayout(getContext());
-        item.setOrientation(LinearLayout.HORIZONTAL);
-        item.setGravity(Gravity.CENTER_VERTICAL);
-        item.setPadding(0, 4, 0, 4);
-
-        float density = getResources().getDisplayMetrics().density;
-
-        View colorBox = new View(getContext());
-        colorBox.setLayoutParams(new LinearLayout.LayoutParams((int) (12 * density), (int) (12 * density)));
-        colorBox.setBackgroundColor(color);
-
-        TextView textView = new TextView(getContext());
-        textView.setText(label);
-        textView.setTextSize(12);
-        textView.setPadding((int) (8 * density), 0, 0, 0);
-        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
-
-        item.addView(colorBox);
-        item.addView(textView);
-        container.addView(item);
+    private void setupDots(LinearLayout container, int count) {
+        container.removeAllViews();
+        float dp = getResources().getDisplayMetrics().density;
+        int size = (int) (8 * dp);
+        int margin = (int) (4 * dp);
+        for (int i = 0; i < count; i++) {
+            View dot = new View(getContext());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.setMargins(margin, 0, margin, 0);
+            dot.setLayoutParams(lp);
+            GradientDrawable shape = new GradientDrawable();
+            shape.setShape(GradientDrawable.OVAL);
+            dot.setBackground(shape);
+            container.addView(dot);
+        }
     }
 
-    // ── Electricity graph ─────────────────────────────────────────────────────
+    private void updateDots(LinearLayout container, int activeIndex) {
+        TypedValue accent = new TypedValue();
+        TypedValue inactive = new TypedValue();
+        requireContext().getTheme().resolveAttribute(R.attr.appColorAccent, accent, true);
+        requireContext().getTheme().resolveAttribute(R.attr.appColorOnSurfaceVariant, inactive, true);
+        for (int i = 0; i < container.getChildCount(); i++) {
+            GradientDrawable shape = (GradientDrawable) container.getChildAt(i).getBackground();
+            shape.setColor(i == activeIndex ? accent.data : inactive.data);
+        }
+    }
 
     private void displayCheapestHours(View view, List<Integer> data) {
         TextView cheapestText = view.findViewById(R.id.cheapest_hours_text);
         if (cheapestText == null || data == null || data.size() < 3) return;
 
-        int minSum = Integer.MAX_VALUE, startIndex = 0;
-        for (int i = 0; i <= data.size() - 3; i++) {
-            int sum = data.get(i) + data.get(i + 1) + data.get(i + 2);
-            if (sum < minSum) { minSum = sum; startIndex = i; }
-        }
-        cheapestText.setText(getString(R.string.cheapest_hours_label,
-            String.format(Locale.getDefault(), "%02d:00 - %02d:00", startIndex, startIndex + 3)));
+        if (firstCheapestHour == null) setFirstCheapestHour(data);
+
+        String timeRange = String.format(Locale.getDefault(), "%02d:00 - %02d:00", firstCheapestHour, firstCheapestHour + 3);
+        cheapestText.setText(getString(R.string.cheapest_hours_label, timeRange));
     }
 
-    // ── Data loading ──────────────────────────────────────────────────────────
+    private void setFirstCheapestHour(List<Integer> data) {
+        int minSum = Integer.MAX_VALUE;
+        int startIndex = 0;
+
+        for (int i = 0; i <= data.size() - 3; i++) {
+            int currentSum = data.get(i) + data.get(i + 1) + data.get(i + 2);
+            if (currentSum <= minSum) {
+                minSum = currentSum;
+                startIndex = i;
+            }
+        }
+
+        firstCheapestHour = startIndex;
+    }
+
+    private List<Integer> loadData(String filename) {
+        List<Integer> data = new ArrayList<>();
+
+        File file = new File(requireContext().getFilesDir(), filename);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            String savedDate = reader.readLine();
+            String dataLine = reader.readLine();
+            if (dataLine != null) {
+                for (String val : dataLine.split(",")) {
+                    data.add(Integer.parseInt(val.trim()));
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            Log.e(TAG, "Error reading internal storage data", e);
+        }
+        return data;
+    }
+
 
     private List<Integer> loadData(String filename, boolean checkDate) {
         List<Integer> data = new ArrayList<>();
@@ -181,25 +314,7 @@ public class HomeFragment extends Fragment {
 
         if (checkDate) {
             File file = new File(requireContext().getFilesDir(), filename);
-            if (file.exists()) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
-                    String savedDate = reader.readLine();
-                    if (today.equals(savedDate)) {
-                        String dataLine = reader.readLine();
-                        if (dataLine != null) {
-                            for (String val : dataLine.split(",")) {
-                                data.add(Integer.parseInt(val.trim()));
-                            }
-                            return data;
-                        }
-                    }
-                } catch (IOException | NumberFormatException e) {
-                    Log.e(TAG, "Error reading internal storage data", e);
-                }
-            }
-
-            AssetManager assetManager = requireContext().getAssets();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 String savedDate = reader.readLine();
                 if (today.equals(savedDate)) {
                     String dataLine = reader.readLine();
@@ -211,7 +326,7 @@ public class HomeFragment extends Fragment {
                     }
                 }
             } catch (IOException | NumberFormatException e) {
-                Log.e(TAG, "Error reading asset data", e);
+                Log.e(TAG, "Error reading internal storage data", e);
             }
 
             return updateElectricityData(filename, today);
@@ -220,84 +335,143 @@ public class HomeFragment extends Fragment {
         AssetManager assetManager = requireContext().getAssets();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(assetManager.open(filename)))) {
             String line = reader.readLine();
-            if (line != null)
-                for (String val : line.split(",")) data.add(Integer.parseInt(val.trim()));
+            if (line != null) {
+                String[] values = line.split(",");
+                for (String val : values) {
+                    data.add(Integer.parseInt(val.trim()));
+                }
+            }
         } catch (IOException | NumberFormatException e) {
-            Log.e(TAG, "Error loading " + filename, e);
-            if (filename.equals("savings_data.txt")) { data.add(40); data.add(60); data.add(35); }
+            Log.e(TAG, "Error loading data from " + filename, e);
         }
         return data;
     }
 
-    private List<Integer> updateElectricityData(String filename, String today) {
-        List<Integer> newData = new ArrayList<>();
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 24; i++) {
-            int val = random.nextInt(21);
-            newData.add(val);
-            sb.append(val);
-            if (i < 23) sb.append(",");
+    private Pair<List<Integer>, Boolean>  getElectricityPrices(String date) {
+        List<Integer> hourlyAverages = new ArrayList<>();
+        HttpURLConnection connection = null;
+        try {
+            // Use the date provided by the update method
+            URL url = new URL("https://api.energy-charts.info/price?bzn=AT&start=" + date);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                JSONObject json = new JSONObject(response.toString());
+                JSONArray prices = json.getJSONArray("price");
+
+                // The API provides prices every 15 minutes (96 entries per day)
+                // We compute the average for each hour (4 entries)
+                for (int hour = 0; hour < 24; hour++) {
+                    float sum = 0;
+                    int count = 0;
+                    for (int i = 0; i < 4; i++) {
+                        int index = hour * 4 + i;
+                        if (index < prices.length()) {
+                            sum += prices.getInt(index) / 10.0;
+                            count++;
+                        }
+                    }
+                    if (count > 0) {
+                        // Round to nearest integer for the graph
+                        hourlyAverages.add(Math.round(sum / count));
+                    } else {
+                        hourlyAverages.add(0);
+                    }
+                }
+                return new Pair<>(hourlyAverages, true);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error fetching electricity prices from API", e);
         }
 
-        File file = new File(requireContext().getFilesDir(), filename);
-        try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
-            writer.println(today);
-            writer.println(sb.toString());
-        } catch (IOException e) {
-            Log.e(TAG, "Error updating electricity data file", e);
+        // Fallback to presaved data if API fails or returns no data
+        if (hourlyAverages.size() < 24) {
+            hourlyAverages = loadData("electricity_prices.txt");
+        }
+        return new Pair<>(hourlyAverages, false);
+    }
+
+    private List<Integer> updateElectricityData(String filename, String today) {
+        Pair<List<Integer>, Boolean> updates = getElectricityPrices(today);
+        List<Integer> newData = updates.first;
+        Boolean upToDate = updates.second;
+        if (upToDate) { //if the fetched data is up to date, modify the file by writing the current date and the new data, otherwise read only
+            File file = new File(requireContext().getFilesDir(), filename);
+            try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
+                writer.println(today);
+                writer.println(newData.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(",")));
+            } catch (IOException e) {
+                Log.e(TAG, "Error updating electricity data file", e);
+            }
         }
         return newData;
     }
 
-    // ── Histogram ─────────────────────────────────────────────────────────────
+    private void setupThresholdLine(View view, int containerHeightPx) {
+        View thresholdLine = view.findViewById(R.id.threshold_line);
+        TextView thresholdLabel = view.findViewById(R.id.threshold_label);
 
-    private void setupThresholdLine(View view, int containerHeightPx, int threshold) {
-        View thresholdLine    = view.findViewById(R.id.threshold_line);
-        TextView thresholdLbl = view.findViewById(R.id.threshold_label);
-        if (thresholdLine == null || thresholdLbl == null) return;
+        if (thresholdLine != null && thresholdLabel != null) {
+            float density = getResources().getDisplayMetrics().density;
+            int labelHeightReserved = (int) (20 * density);
 
-        float density           = getResources().getDisplayMetrics().density;
-        int labelHeightReserved = (int) (20 * density);
-        int marginPx            = (int) ((threshold / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
+            int thresholdMarginPx = (int) ((THRESHOLD / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
 
-        ViewGroup.MarginLayoutParams lineParams = (ViewGroup.MarginLayoutParams) thresholdLine.getLayoutParams();
-        lineParams.bottomMargin = marginPx;
-        thresholdLine.setLayoutParams(lineParams);
+            ViewGroup.MarginLayoutParams lineParams = (ViewGroup.MarginLayoutParams) thresholdLine.getLayoutParams();
+            lineParams.bottomMargin = thresholdMarginPx;
+            thresholdLine.setLayoutParams(lineParams);
 
-        ViewGroup.MarginLayoutParams labelParams = (ViewGroup.MarginLayoutParams) thresholdLbl.getLayoutParams();
-        labelParams.bottomMargin = marginPx + (int) (2 * density);
-        thresholdLbl.setLayoutParams(labelParams);
-        thresholdLbl.setText(String.valueOf(threshold));
+            ViewGroup.MarginLayoutParams labelParams = (ViewGroup.MarginLayoutParams) thresholdLabel.getLayoutParams();
+            labelParams.bottomMargin = thresholdMarginPx + (int) (2 * density);
+            thresholdLabel.setLayoutParams(labelParams);
+            thresholdLabel.setText(String.valueOf(THRESHOLD));
+        }
     }
 
-    private void populateHistogram(LinearLayout container, List<Integer> data, int containerHeightPx, int threshold) {
+    private void populateHistogram(LinearLayout container, List<Integer> data, int containerHeightPx) {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
 
         for (Integer value : data) {
-            LinearLayout bin = new LinearLayout(getContext());
-            bin.setOrientation(LinearLayout.VERTICAL);
-            bin.setGravity(Gravity.BOTTOM);
+            LinearLayout binContainer = new LinearLayout(getContext());
+            binContainer.setOrientation(LinearLayout.VERTICAL);
+            binContainer.setGravity(Gravity.BOTTOM);
             LinearLayout.LayoutParams binParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
             binParams.setMargins((int) (8 * density), 0, (int) (8 * density), 0);
-            bin.setLayoutParams(binParams);
+            binContainer.setLayoutParams(binParams);
 
-            TextView lbl = new TextView(getContext());
-            lbl.setText(String.valueOf(value));
-            lbl.setTextSize(11);
-            lbl.setGravity(Gravity.CENTER_HORIZONTAL);
-            lbl.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
-            bin.addView(lbl);
+            TextView valueLabel = new TextView(getContext());
+            valueLabel.setText(String.valueOf(value));
+            valueLabel.setTextSize(11);
+            valueLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            valueLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.neutral_60));
+            binContainer.addView(valueLabel);
 
             View bar = new View(getContext());
-            int labelReserved = (int) (20 * density);
-            int barH = (int) ((value / (float) MAX_VALUE) * (containerHeightPx - labelReserved));
-            bar.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, barH));
-            bar.setBackgroundColor(ContextCompat.getColor(requireContext(),
-                value >= threshold ? R.color.green_40 : R.color.red_40));
-            bin.addView(bar);
-            container.addView(bin);
+            int labelHeightReserved = (int) (20 * density);
+            int barHeightPx = (int) ((value / (float) MAX_VALUE) * (containerHeightPx - labelHeightReserved));
+
+            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, barHeightPx);
+            bar.setLayoutParams(barParams);
+
+            int colorRes = (value >= THRESHOLD) ? R.color.green_40 : R.color.red_40;
+            bar.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes));
+
+            binContainer.addView(bar);
+            container.addView(binContainer);
         }
     }
 
@@ -305,19 +479,25 @@ public class HomeFragment extends Fragment {
         container.removeAllViews();
         float density = getResources().getDisplayMetrics().density;
 
-        for (Integer value : data) {
+        for (int i = 0; i < data.size(); i++) {
             View bar = new View(getContext());
-            int barH = (int) ((value / (float) MAX_ELEC_PRICE) * containerHeightPx);
-            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, barH, 1.0f);
-            p.setMargins((int) (1 * density), 0, (int) (1 * density), 0);
-            bar.setLayoutParams(p);
+            int barHeightPx = (int) ((data.get(i) / (float) MAX_ELEC_PRICE) * containerHeightPx);
 
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, barHeightPx, 1.0f);
+            params.setMargins((int) (1 * density), 0, (int) (1 * density), 0);
+            bar.setLayoutParams(params);
+            if (firstCheapestHour == null) setFirstCheapestHour(data);
             int color;
-            if (value < 10)      color = ContextCompat.getColor(requireContext(), R.color.green_40);
-            else if (value < 15) color = ContextCompat.getColor(requireContext(), R.color.teal_40);
-            else                 color = ContextCompat.getColor(requireContext(), R.color.amber_40);
+            if (i >= firstCheapestHour && i < firstCheapestHour + 3) {
+                color = ContextCompat.getColor(requireContext(), R.color.green_40);
+            } else {
+                color = ContextCompat.getColor(requireContext(), R.color.teal_40);
+            }
             bar.setBackgroundColor(color);
+
             container.addView(bar);
+
         }
+        updateCurrentTimeLine();
     }
 }

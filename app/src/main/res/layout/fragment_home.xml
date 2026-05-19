@@ -7,31 +7,14 @@
     android:orientation="vertical"
     android:padding="@dimen/spacing_md">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/greeting"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_sm"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/greeting"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/greeting"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-            android:textColor="?attr/appColorOnSurface" />
-
-        <ImageButton
-            android:id="@+id/btn_settings"
-            android:layout_width="@dimen/icon_button_size"
-            android:layout_height="@dimen/icon_button_size"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_settings"
-            app:tint="?attr/appColorOnSurfaceVariant" />
-
-    </LinearLayout>
+        android:text="@string/greeting"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+        android:textColor="?attr/appColorOnSurface" />
 
     <!-- Sparziel -->
     <com.google.android.material.card.MaterialCardView
@@ -131,16 +114,6 @@
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/appColorOnSurface" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:gravity="bottom"
-                android:paddingStart="0dp"
-                android:paddingEnd="@dimen/spacing_xs"
-                android:text="@string/elec_unit"
-                android:textColor="?attr/appColorOnSurfaceVariant"
-                android:textSize="@dimen/text_xs" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -154,6 +127,16 @@
                     android:layout_height="match_parent"
                     android:gravity="end"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:gravity="bottom"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="@dimen/spacing_xs"
+                        android:text="@string/elec_unit"
+                        android:textColor="?attr/appColorOnSurfaceVariant"
+                        android:textSize="8sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -171,16 +154,26 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/electricity_graph_container"
+                <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="20dp"
-                    android:layout_weight="1"
-                    android:gravity="bottom"
-                    android:orientation="horizontal" >
+                    android:layout_weight="1">
 
-                </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/electricity_graph_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="bottom"
+                        android:orientation="horizontal" />
+
+                    <View
+                        android:id="@+id/current_time_line"
+                        android:layout_width="2dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/amber_40"
+                        android:visibility="gone" />
+                </FrameLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -229,37 +222,19 @@
             android:orientation="vertical"
             android:padding="@dimen/spacing_md">
 
-            <TextView
-                android:id="@+id/pie_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/energy_distribution"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="?attr/appColorOnSurface" />
-
-            <LinearLayout
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/pie_chart_pager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_weight="1" />
 
-                <com.example.savesomebills.PieChartView
-                    android:id="@+id/pie_chart_view"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
-
-                <LinearLayout
-                    android:id="@+id/pie_legend_container"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/spacing_md" />
-
-            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/dots_pie_chart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/spacing_sm" />
 
         </LinearLayout>
 
