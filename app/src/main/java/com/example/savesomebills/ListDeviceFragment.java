@@ -58,16 +58,13 @@ public class ListDeviceFragment extends Fragment {
                         .setTitle("Meine Geräte")
                         .setMessage(
                                 "Hier siehst du alle Geräte in dieser Gruppe.\n\n" +
-
                                         "🔌 Verbrauch\n" +
                                         "• Watt (W) = Stromverbrauch im Betrieb\n" +
                                         "• Mehr Watt = höherer Verbrauch\n\n" +
-
                                         "📊 Einordnung\n" +
                                         "• Klein: 5–100 W\n" +
                                         "• Mittel: 50–200 W\n" +
                                         "• Groß: 300 W+\n\n" +
-
                                         "✏️ Bearbeiten\n" +
                                         "• Stift = Gerät anpassen\n" +
                                         "• Blaues + unten rechts = neues Gerät hinzufügen"
