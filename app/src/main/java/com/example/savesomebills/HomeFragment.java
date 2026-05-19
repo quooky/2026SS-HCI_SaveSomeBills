@@ -17,6 +17,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,22 +57,27 @@ public class HomeFragment extends Fragment {
         ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
         LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
-        List<Integer> histData = loadData("savings_data.txt", false);
-        List<Integer> elecData = loadData("electricity_prices.txt", true);
+        // Load data in background to avoid NetworkOnMainThreadException
+        new Thread(() -> {
+            List<Integer> histData = loadData("savings_data.txt", false);
+            List<Integer> elecData = loadData("electricity_prices.txt", true);
 
-        view.post(() -> {
-            if (histogramContainer != null) {
-                populateHistogram(histogramContainer, histData, histogramContainer.getHeight());
-                setupThresholdLine(view, histogramContainer.getHeight());
-            }
-            if (electricityContainer != null) {
-                populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
-                displayCheapestHours(view, elecData);
-            }
-            if (piePager != null && pieDots != null) {
-                setupPiePager(piePager, pieDots);
-            }
-        });
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                if (getView() == null) return;
+                if (histogramContainer != null) {
+                    populateHistogram(histogramContainer, histData, histogramContainer.getHeight());
+                    setupThresholdLine(view, histogramContainer.getHeight());
+                }
+                if (electricityContainer != null) {
+                    populateElectricityGraph(electricityContainer, elecData, electricityContainer.getHeight());
+                    displayCheapestHours(view, elecData);
+                }
+                if (piePager != null && pieDots != null) {
+                    setupPiePager(piePager, pieDots);
+                }
+            });
+        }).start();
 
         return view;
     }
@@ -271,21 +281,71 @@ public class HomeFragment extends Fragment {
         return data;
     }
 
-    private List<Integer> updateElectricityData(String filename, String today) {
-        List<Integer> newData = new ArrayList<>();
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 24; i++) {
-            int val = random.nextInt(21);
-            newData.add(val);
-            sb.append(val);
-            if (i < 23) sb.append(",");
+    private List<Integer> getElectricityPrices(String date) {
+        List<Integer> hourlyAverages = new ArrayList<>();
+        HttpURLConnection connection = null;
+        try {
+            // Use the date provided by the update method
+            URL url = new URL("https://api.energy-charts.info/price?bzn=AT&start=" + date);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                JSONObject json = new JSONObject(response.toString());
+                JSONArray prices = json.getJSONArray("price");
+
+                // The API provides prices every 15 minutes (96 entries per day)
+                // We compute the average for each hour (4 entries)
+                for (int hour = 0; hour < 24; hour++) {
+                    float sum = 0;
+                    int count = 0;
+                    for (int i = 0; i < 4; i++) {
+                        int index = hour * 4 + i;
+                        if (index < prices.length()) {
+                            sum += prices.getInt(index) / 10.0;
+                            count++;
+                        }
+                    }
+                    if (count > 0) {
+                        // Round to nearest integer for the graph
+                        hourlyAverages.add(Math.round(sum / count));
+                    } else {
+                        hourlyAverages.add(0);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error fetching electricity prices from API", e);
         }
+
+        // Fallback to random data if API fails or returns no data
+        if (hourlyAverages.size() < 24) {
+            hourlyAverages.clear();
+            Random random = new Random();
+            for (int i = 0; i < 24; i++) {
+                hourlyAverages.add(random.nextInt(21));
+            }
+        }
+        return hourlyAverages;
+    }
+
+    private List<Integer> updateElectricityData(String filename, String today) {
+        List<Integer> newData = getElectricityPrices(today);
 
         File file = new File(requireContext().getFilesDir(), filename);
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
             writer.println(today);
-            writer.println(sb.toString());
+            writer.println(newData);
         } catch (IOException e) {
             Log.e(TAG, "Error updating electricity data file", e);
         }
