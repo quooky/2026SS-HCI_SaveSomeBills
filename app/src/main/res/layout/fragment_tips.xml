@@ -31,18 +31,16 @@
     </LinearLayout>
 
     <!-- Anwendungs-Tipps -->
-
-    <!-- Geräte-Tipps -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="@dimen/spacing_sm"
         android:layout_weight="0.8"
+        android:layout_marginBottom="@dimen/spacing_sm"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/spacing_xxl"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_xs"
             android:text="💡 Anwendungs-Tipps"
             android:textAppearance="?attr/textAppearanceLabelLarge"
@@ -52,7 +50,7 @@
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager_general"
             android:layout_width="match_parent"
-            android:layout_height="162dp"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="@dimen/spacing_xs"
@@ -68,16 +66,17 @@
 
     </LinearLayout>
 
+    <!-- Geräte-Tipps -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="@dimen/spacing_sm"
         android:layout_weight="0.8"
+        android:layout_marginBottom="@dimen/spacing_sm"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="42dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing_xs"
             android:text="🔌 Geräte-Tipps"
             android:textAppearance="?attr/textAppearanceLabelLarge"
@@ -106,23 +105,31 @@
     <!-- Aktions-Tipps -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"
+        android:layout_height="0dp"
+        android:layout_weight="1.4"
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="166dp"
-            android:layout_height="@dimen/spacing_xxl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/action_tips_heading"
             android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textColor="?attr/appColorOnSurface"
             android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:text="@string/action_tips_subtitle"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/appColorOnSurfaceVariant" />
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager_action"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_weight="0.5"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="@dimen/spacing_xs"
             android:paddingEnd="@dimen/spacing_xs" />

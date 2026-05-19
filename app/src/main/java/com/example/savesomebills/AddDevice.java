@@ -47,16 +47,20 @@ public class AddDevice extends AppCompatActivity {
 
     private Spinner              spinnerRoom;
     private TextInputEditText    inputName, inputOnHours, inputStandbyHours;
-    private TextView             tvWattResult, tvCostPerHour, tvDeviceIcon, tvTitle;
+    private TextInputEditText    inputWattOn, inputWattStandby;
+    private TextView             tvCostPerHour, tvDeviceIcon, tvTitle;
     private View                 gradientBarContainer, gradientBarIndicator;
     private MaterialButton       btnCancel;
     private ArrayAdapter<String> roomAdapter;
     private List<String>         rooms = new ArrayList<>();
 
-    private int    wattOn       = 0;
-    private int    wattStandby  = 0;
-    private String selectedIcon = "⚡";
-    private Device editDevice   = null;  // non-null = edit mode
+    private int      wattOn         = 0;
+    private int      wattStandby    = 0;
+    private String   selectedIcon   = "⚡";
+    private Device   editDevice     = null;
+    private boolean  updatingHours  = false;
+    private View     layoutWattManual;
+    private TextView tvWattChevron;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,15 @@ public class AddDevice extends AppCompatActivity {
         inputName            = findViewById(R.id.input_name);
         inputOnHours         = findViewById(R.id.input_on_hours);
         inputStandbyHours    = findViewById(R.id.input_standby_hours);
-        tvWattResult         = findViewById(R.id.tv_watt_result);
+        inputWattOn          = findViewById(R.id.input_watt_on);
+        inputWattStandby     = findViewById(R.id.input_watt_standby);
+        layoutWattManual     = findViewById(R.id.layout_watt_manual);
+        tvWattChevron        = findViewById(R.id.tv_watt_chevron);
+        findViewById(R.id.header_watt_manual).setOnClickListener(v -> {
+            boolean visible = layoutWattManual.getVisibility() == View.VISIBLE;
+            layoutWattManual.setVisibility(visible ? View.GONE : View.VISIBLE);
+            tvWattChevron.setText(visible ? "▶" : "▼");
+        });
         tvCostPerHour        = findViewById(R.id.tv_cost_per_hour);
         tvDeviceIcon         = findViewById(R.id.tv_device_icon);
         tvTitle              = findViewById(R.id.tv_title);
@@ -109,10 +121,11 @@ public class AddDevice extends AppCompatActivity {
             wattOn      = editDevice.wattOn;
             wattStandby = editDevice.wattStandby;
             if (wattOn > 0) {
-                tvWattResult.setText("⚡ " + wattOn + "W ON  |  " + wattStandby + "W Standby");
-                tvWattResult.setTextColor(getColor(R.color.teal_40));
-                updateForecast();
+                inputWattOn.setText(String.valueOf(wattOn));
+                layoutWattManual.setVisibility(View.VISIBLE);
+                tvWattChevron.setText("▼");
             }
+            if (wattStandby > 0) inputWattStandby.setText(String.valueOf(wattStandby));
             if (rooms.contains(editDevice.groupId)) {
                 spinnerRoom.setSelection(rooms.indexOf(editDevice.groupId) + 1);
             }
@@ -121,13 +134,72 @@ public class AddDevice extends AppCompatActivity {
             btnCancel.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.red_40)));
         }
 
-        TextWatcher watcher = new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { updateForecast(); }
-        };
-        inputOnHours.addTextChangedListener(watcher);
-        inputStandbyHours.addTextChangedListener(watcher);
+        // ON hours → auto-calc standby, clamp 0-24
+        inputOnHours.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                if (updatingHours) return;
+                String t = s.toString().trim();
+                if (!t.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(t);
+                        if (val > 24) {
+                            updatingHours = true;
+                            inputOnHours.setText("24");
+                            inputOnHours.setSelection(2);
+                            updatingHours = false;
+                            val = 24;
+                        }
+                        updatingHours = true;
+                        inputStandbyHours.setText(String.valueOf(24 - val));
+                        updatingHours = false;
+                    } catch (NumberFormatException ignored) {}
+                }
+                updateForecast();
+            }
+        });
+        // Standby hours → clamp 0-24
+        inputStandbyHours.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                if (updatingHours) return;
+                String t = s.toString().trim();
+                if (!t.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(t);
+                        if (val > 24) {
+                            updatingHours = true;
+                            inputStandbyHours.setText("24");
+                            inputStandbyHours.setSelection(2);
+                            updatingHours = false;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                updateForecast();
+            }
+        });
+        // Watt ON field
+        inputWattOn.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                String t = s.toString().trim();
+                wattOn = t.isEmpty() ? 0 : Integer.parseInt(t);
+                updateForecast();
+            }
+        });
+        // Watt Standby field
+        inputWattStandby.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                String t = s.toString().trim();
+                wattStandby = t.isEmpty() ? 0 : Integer.parseInt(t);
+                updateForecast();
+            }
+        });
 
         findViewById(R.id.imageButton3).setOnClickListener(v -> finish());
 
@@ -168,11 +240,6 @@ public class AddDevice extends AppCompatActivity {
                 Toast.makeText(this, "Bitte einen Raum auswählen", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (wattOn == 0 && editDevice == null) {
-                Toast.makeText(this, "Bitte erst EasyScan verwenden", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             int onHours      = Integer.parseInt(onStr);
             int standbyHours = Integer.parseInt(sbStr);
 
@@ -287,11 +354,10 @@ public class AddDevice extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             Random random = new Random();
-            wattOn      = 10 + random.nextInt(491);
-            wattStandby = 1  + random.nextInt(20);
-            tvWattResult.setText("⚡ " + wattOn + "W ON  |  " + wattStandby + "W Standby");
-            tvWattResult.setTextColor(getColor(R.color.teal_40));
-            updateForecast();
+            inputWattOn.setText(String.valueOf(10 + random.nextInt(491)));
+            inputWattStandby.setText(String.valueOf(1 + random.nextInt(20)));
+            layoutWattManual.setVisibility(View.VISIBLE);
+            tvWattChevron.setText("▼");
         }
     }
 

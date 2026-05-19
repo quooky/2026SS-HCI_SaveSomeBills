@@ -67,7 +67,7 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
         holder.title.setText(tip.title);
 
         String savingStr = AppSettings.formatEnergy(holder.itemView.getContext(), tip.savingKwhPerMonth);
-        holder.confirmSavingStr = "~" + savingStr + " sparen";
+        holder.confirmSavingStr = savingStr + " sparen";
 
         boolean isConfirmed = confirmed.contains(tip.id);
         applyConfirmedState(holder, isConfirmed);

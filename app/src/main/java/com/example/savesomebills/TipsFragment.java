@@ -55,6 +55,8 @@ public class TipsFragment extends Fragment {
         "Lade dein Smartphone nicht über Nacht – das spart Strom und schont den Akku."
     };
 
+    private ActionTipsPagerAdapter adapterAction;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -70,6 +72,12 @@ public class TipsFragment extends Fragment {
         setupActionPager(view);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapterAction != null) adapterAction.notifyDataSetChanged();
     }
 
     // ── Regular tip pager ─────────────────────────────────────────────────────
@@ -110,8 +118,8 @@ public class TipsFragment extends Fragment {
         if (tips.isEmpty()) return;
 
         Set<String> confirmed = AppSettings.getConfirmedTips(requireContext());
-        ActionTipsPagerAdapter adapter = new ActionTipsPagerAdapter(tips, confirmed);
-        adapter.setOnConfirmListener(tip -> {
+        adapterAction = new ActionTipsPagerAdapter(tips, confirmed);
+        adapterAction.setOnConfirmListener(tip -> {
             String saving = AppSettings.formatEnergy(requireContext(), tip.savingKwhPerMonth);
             Toast.makeText(requireContext(),
                 "Super! Du sparst ~" + saving + "/Monat 🎉",
@@ -119,7 +127,7 @@ public class TipsFragment extends Fragment {
         });
 
         ViewPager2 pager = root.findViewById(R.id.pager_action);
-        pager.setAdapter(adapter);
+        pager.setAdapter(adapterAction);
         pager.setOffscreenPageLimit(1);
         pager.setPageTransformer((page, position) -> {
             float scale = 1f - 0.08f * Math.abs(position);

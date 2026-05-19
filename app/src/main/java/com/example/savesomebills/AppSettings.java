@@ -49,14 +49,14 @@ public class AppSettings {
         switch (getEnergyUnit(context)) {
             case UNIT_PHONE: {
                 int n = (int) Math.round(kwh * 1000.0 / WH_PER_PHONE);
-                return n + " Handyladung" + (n == 1 ? "" : "en");
+                return "~" + n + " 📱";
             }
             case UNIT_EV: {
                 int km = (int) Math.round(kwh * KM_PER_KWH);
-                return "~" + km + " km E-Auto";
+                return "~" + km + " km ⚡";
             }
             default:
-                return String.format(Locale.getDefault(), "%.1f kWh", kwh);
+                return String.format(Locale.getDefault(), "~%.1f kWh", kwh);
         }
     }
 

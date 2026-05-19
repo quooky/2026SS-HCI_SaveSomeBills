@@ -218,6 +218,88 @@
                 android:textColorHint="?attr/appColorOnSurfaceVariant" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Manuelle Watt Angabe (collapsible) -->
+        <LinearLayout
+            android:id="@+id/header_watt_manual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Manuelle Watt Angabe"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/appColorOnSurface" />
+
+            <TextView
+                android:id="@+id/tv_watt_chevron"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▶"
+                android:textColor="?attr/appColorOnSurfaceVariant"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_watt_manual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:layout_weight="1"
+                app:boxBackgroundColor="?attr/appColorSurface"
+                app:boxStrokeColor="@color/input_stroke"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_watt_on"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="W aktiv"
+                    android:inputType="number"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/appColorOnSurface"
+                    android:textColorHint="?attr/appColorOnSurfaceVariant" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                app:boxBackgroundColor="?attr/appColorSurface"
+                app:boxStrokeColor="@color/input_stroke"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_watt_standby"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="W Standby"
+                    android:inputType="number"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/appColorOnSurface"
+                    android:textColorHint="?attr/appColorOnSurfaceVariant" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
         <!-- EasyScan button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_easy_scan"
@@ -231,15 +313,6 @@
             app:cornerRadius="@dimen/corner_lg"
             app:icon="@drawable/ic_camera"
             app:iconGravity="textStart" />
-
-        <TextView
-            android:id="@+id/tv_watt_result"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_sm"
-            android:text="Scanne das Gerät um die Watt zu bestimmen"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            android:textColor="?attr/appColorOnSurfaceVariant" />
 
         <!-- Vorhersage card -->
         <com.google.android.material.card.MaterialCardView
