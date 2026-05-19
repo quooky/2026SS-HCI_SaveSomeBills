@@ -73,8 +73,8 @@ public class HomeFragment extends Fragment {
         PieChartView pieChartView         = rootView.findViewById(R.id.pie_chart_view);
         LinearLayout legendContainer      = rootView.findViewById(R.id.pie_legend_container);
 
-        List<Integer> histData = loadData("savings_data.txt");
-        List<Integer> elecData = loadData("electricity_prices.txt");
+        List<Integer> histData = loadData("savings_data.txt", false);
+        List<Integer> elecData = loadData("electricity_prices.txt", true);
 
         rootView.post(() -> {
             if (histogramContainer != null) {
