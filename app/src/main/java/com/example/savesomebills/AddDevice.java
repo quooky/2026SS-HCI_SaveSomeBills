@@ -2,6 +2,7 @@ package com.example.savesomebills;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -22,6 +23,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
@@ -32,25 +35,34 @@ import java.util.Random;
 
 public class AddDevice extends AppCompatActivity {
 
-    public  static final String EXTRA_PRESELECT_ROOM = "preselect_room";
+    public static final String EXTRA_PRESELECT_ROOM  = "preselect_room";
+    public static final String EXTRA_EDIT_DEVICE_ID  = "edit_device_id";
+
     private static final int    REQUEST_CAMERA  = 1001;
     private static final double PRICE_PER_KWH   = 0.30;
     private static final double MAX_COST_DAY    = 3.0;
-    private static final String PREFS_NAME       = "app_prefs";
-    private static final String KEY_ROOMS        = "rooms";
-    private static final String PLACEHOLDER      = "Raum wählen...";
-    private static final String ADD_ROOM         = "+ Hinzufügen";
+    private static final String PREFS_NAME      = "app_prefs";
+    private static final String KEY_ROOMS       = "rooms";
+    private static final String PLACEHOLDER     = "Raum wählen...";
+    private static final String ADD_ROOM        = "+ Hinzufügen";
 
-    private Spinner           spinnerRoom;
-    private TextInputEditText inputName, inputOnHours, inputStandbyHours;
-    private TextView          tvWattResult, tvCostPerHour, tvDeviceIcon;
-    private View              gradientBarContainer, gradientBarIndicator;
+    private Spinner              spinnerRoom;
+    private TextInputEditText    inputName, inputOnHours, inputStandbyHours;
+    private Slider               sliderWattOn, sliderWattStandby;
+    private TextView             tvWattOnValue, tvWattStandbyValue;
+    private TextView             tvCostPerHour, tvDeviceIcon, tvTitle;
+    private View                 gradientBarContainer, gradientBarIndicator;
+    private MaterialButton       btnCancel;
     private ArrayAdapter<String> roomAdapter;
-    private List<String>      rooms = new ArrayList<>();
+    private List<String>         rooms = new ArrayList<>();
 
-    private int    wattOn          = 0;
-    private int    wattStandby     = 0;
-    private String selectedIcon    = "⚡";
+    private int      wattOn         = 0;
+    private int      wattStandby    = 0;
+    private String   selectedIcon   = "⚡";
+    private Device   editDevice     = null;
+    private boolean  updatingHours  = false;
+    private View     layoutWattManual;
+    private TextView tvWattChevron;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +70,27 @@ public class AddDevice extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_add_device);
 
-        spinnerRoom       = findViewById(R.id.spinner_room);
-        inputName         = findViewById(R.id.input_name);
-        inputOnHours      = findViewById(R.id.input_on_hours);
-        inputStandbyHours = findViewById(R.id.input_standby_hours);
-        tvWattResult          = findViewById(R.id.tv_watt_result);
-        tvCostPerHour         = findViewById(R.id.tv_cost_per_hour);
-        tvDeviceIcon          = findViewById(R.id.tv_device_icon);
-        gradientBarContainer  = findViewById(R.id.gradient_bar_container);
-        gradientBarIndicator  = findViewById(R.id.gradient_bar_indicator);
+        spinnerRoom          = findViewById(R.id.spinner_room);
+        inputName            = findViewById(R.id.input_name);
+        inputOnHours         = findViewById(R.id.input_on_hours);
+        inputStandbyHours    = findViewById(R.id.input_standby_hours);
+        sliderWattOn         = findViewById(R.id.slider_watt_on);
+        sliderWattStandby    = findViewById(R.id.slider_watt_standby);
+        tvWattOnValue        = findViewById(R.id.tv_watt_on_value);
+        tvWattStandbyValue   = findViewById(R.id.tv_watt_standby_value);
+        layoutWattManual     = findViewById(R.id.layout_watt_manual);
+        tvWattChevron        = findViewById(R.id.tv_watt_chevron);
+        findViewById(R.id.header_watt_manual).setOnClickListener(v -> {
+            boolean visible = layoutWattManual.getVisibility() == View.VISIBLE;
+            layoutWattManual.setVisibility(visible ? View.GONE : View.VISIBLE);
+            tvWattChevron.setText(visible ? "▶" : "▼");
+        });
+        tvCostPerHour        = findViewById(R.id.tv_cost_per_hour);
+        tvDeviceIcon         = findViewById(R.id.tv_device_icon);
+        tvTitle              = findViewById(R.id.tv_title);
+        gradientBarContainer = findViewById(R.id.gradient_bar_container);
+        gradientBarIndicator = findViewById(R.id.gradient_bar_indicator);
+        btnCancel            = findViewById(R.id.btn_cancel);
 
         tvDeviceIcon.setOnClickListener(v ->
             EmojiPickerDialog.show(this, EmojiPickerDialog.DEVICE_EMOJIS, emoji -> {
@@ -78,21 +102,122 @@ public class AddDevice extends AppCompatActivity {
         loadRooms();
         setupSpinner();
 
+        // Preselect room if launched from group list
         String preselect = getIntent().getStringExtra(EXTRA_PRESELECT_ROOM);
         if (preselect != null && rooms.contains(preselect)) {
-            spinnerRoom.setSelection(rooms.indexOf(preselect) + 1); // +1 for placeholder
+            spinnerRoom.setSelection(rooms.indexOf(preselect) + 1);
         }
 
-        TextWatcher watcher = new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { updateForecast(); }
-        };
-        inputOnHours.addTextChangedListener(watcher);
-        inputStandbyHours.addTextChangedListener(watcher);
+        // Edit mode: pre-fill fields from existing device
+        String editId = getIntent().getStringExtra(EXTRA_EDIT_DEVICE_ID);
+        if (editId != null) {
+            for (Device d : DeviceStorage.loadAll(this)) {
+                if (d.objectId.equals(editId)) { editDevice = d; break; }
+            }
+        }
+        if (editDevice != null) {
+            tvTitle.setText("Gerät bearbeiten");
+            selectedIcon = editDevice.icon;
+            tvDeviceIcon.setText(selectedIcon);
+            inputName.setText(editDevice.name);
+            inputOnHours.setText(String.valueOf(editDevice.onHours));
+            inputStandbyHours.setText(String.valueOf(editDevice.standbyHours));
+            wattOn      = editDevice.wattOn;
+            wattStandby = editDevice.wattStandby;
+            if (wattOn > 0) {
+                sliderWattOn.setValue(Math.min(wattOn, 2000));
+                tvWattOnValue.setText(wattOn + " W");
+                layoutWattManual.setVisibility(View.VISIBLE);
+                tvWattChevron.setText("▼");
+            }
+            if (wattStandby > 0) {
+                sliderWattStandby.setValue(Math.min(wattStandby, 100));
+                tvWattStandbyValue.setText(wattStandby + " W");
+            }
+            if (rooms.contains(editDevice.groupId)) {
+                spinnerRoom.setSelection(rooms.indexOf(editDevice.groupId) + 1);
+            }
+            // Turn Cancel into a Delete button
+            btnCancel.setText("Löschen");
+            btnCancel.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.red_40)));
+        }
+
+        // ON hours → auto-calc standby, clamp 0-24
+        inputOnHours.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                if (updatingHours) return;
+                String t = s.toString().trim();
+                if (!t.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(t);
+                        if (val > 24) {
+                            updatingHours = true;
+                            inputOnHours.setText("24");
+                            inputOnHours.setSelection(2);
+                            updatingHours = false;
+                            val = 24;
+                        }
+                        updatingHours = true;
+                        inputStandbyHours.setText(String.valueOf(24 - val));
+                        updatingHours = false;
+                    } catch (NumberFormatException ignored) {}
+                }
+                updateForecast();
+            }
+        });
+        // Standby hours → clamp 0-24
+        inputStandbyHours.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
+            public void onTextChanged(CharSequence s, int i, int b, int c) {}
+            public void afterTextChanged(Editable s) {
+                if (updatingHours) return;
+                String t = s.toString().trim();
+                if (!t.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(t);
+                        if (val > 24) {
+                            updatingHours = true;
+                            inputStandbyHours.setText("24");
+                            inputStandbyHours.setSelection(2);
+                            updatingHours = false;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                updateForecast();
+            }
+        });
+        // Watt sliders
+        sliderWattOn.addOnChangeListener((slider, value, fromUser) -> {
+            wattOn = (int) value;
+            tvWattOnValue.setText((int) value + " W");
+            updateForecast();
+        });
+        sliderWattStandby.addOnChangeListener((slider, value, fromUser) -> {
+            wattStandby = (int) value;
+            tvWattStandbyValue.setText((int) value + " W");
+            updateForecast();
+        });
 
         findViewById(R.id.imageButton3).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_cancel).setOnClickListener(v -> finish());
+
+        btnCancel.setOnClickListener(v -> {
+            if (editDevice != null) {
+                new AlertDialog.Builder(this)
+                    .setTitle("Gerät löschen")
+                    .setMessage("\"" + editDevice.name + "\" wirklich löschen?")
+                    .setPositiveButton("Löschen", (d, w) -> {
+                        DeviceStorage.delete(this, editDevice.objectId);
+                        Toast.makeText(this, "Gerät gelöscht", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .setNegativeButton("Abbrechen", null)
+                    .show();
+            } else {
+                finish();
+            }
+        });
 
         findViewById(R.id.btn_easy_scan).setOnClickListener(v -> {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -114,11 +239,6 @@ public class AddDevice extends AppCompatActivity {
                 Toast.makeText(this, "Bitte einen Raum auswählen", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (wattOn == 0) {
-                Toast.makeText(this, "Bitte erst EasyScan verwenden", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             int onHours      = Integer.parseInt(onStr);
             int standbyHours = Integer.parseInt(sbStr);
 
@@ -127,8 +247,22 @@ public class AddDevice extends AppCompatActivity {
                 return;
             }
 
-            DeviceStorage.save(this, new Device(name, selected, onHours, standbyHours, wattOn, wattStandby, selectedIcon));
-            Toast.makeText(this, "Gerät gespeichert", Toast.LENGTH_SHORT).show();
+            if (editDevice != null) {
+                editDevice.name         = name;
+                editDevice.groupId      = selected;
+                editDevice.onHours      = onHours;
+                editDevice.standbyHours = standbyHours;
+                editDevice.icon         = selectedIcon;
+                if (wattOn > 0) {
+                    editDevice.wattOn      = wattOn;
+                    editDevice.wattStandby = wattStandby;
+                }
+                DeviceStorage.update(this, editDevice);
+                Toast.makeText(this, "Gerät gespeichert", Toast.LENGTH_SHORT).show();
+            } else {
+                DeviceStorage.save(this, new Device(name, selected, onHours, standbyHours, wattOn, wattStandby, selectedIcon));
+                Toast.makeText(this, "Gerät gespeichert", Toast.LENGTH_SHORT).show();
+            }
             finish();
         });
 
@@ -184,7 +318,7 @@ public class AddDevice extends AppCompatActivity {
                     rooms.add(room);
                     saveRooms();
                     setupSpinner();
-                    spinnerRoom.setSelection(rooms.size()); // select new room
+                    spinnerRoom.setSelection(rooms.size());
                 }
             })
             .setNegativeButton("Abbrechen", null)
@@ -219,11 +353,14 @@ public class AddDevice extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             Random random = new Random();
-            wattOn      = 10 + random.nextInt(491);
-            wattStandby = 1  + random.nextInt(20);
-            tvWattResult.setText("⚡ " + wattOn + "W ON  |  " + wattStandby + "W Standby");
-            tvWattResult.setTextColor(getColor(R.color.teal_40));
-            updateForecast();
+            int scannedOn      = 10 + random.nextInt(491);
+            int scannedStandby = 1  + random.nextInt(20);
+            sliderWattOn.setValue(Math.min(scannedOn, 2000));
+            sliderWattStandby.setValue(Math.min(scannedStandby, 100));
+            tvWattOnValue.setText(scannedOn + " W");
+            tvWattStandbyValue.setText(scannedStandby + " W");
+            layoutWattManual.setVisibility(View.VISIBLE);
+            tvWattChevron.setText("▼");
         }
     }
 

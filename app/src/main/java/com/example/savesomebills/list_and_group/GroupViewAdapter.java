@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.savesomebills.AppSettings;
 import com.example.savesomebills.R;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Group ob = group_list.get(position);
         holder.getName().setText(ob.getName());
-        holder.getEnergy().setText(ob.getEnergy_amount());
+        holder.getEnergy().setText(AppSettings.formatEnergy(holder.getEnergy().getContext(),0.001 * ob.getEnergy_amount() ) );
         holder.getIcon().setText(ob.getIcon());
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onGroupClick(ob.getName());

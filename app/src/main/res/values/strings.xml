@@ -25,4 +25,14 @@
     <string name="category_3">Category 3</string>
     <string name="category_4">Category 4</string>
     <string name="others">Sonstiges</string>
+    <string name="savings_target_format">Sparziel: %1$d €/Monat</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_goal_label">Sparziel</string>
+    <string name="settings_goal_suffix">€ / Monat</string>
+    <string name="settings_unit_label">Anzeigeeinheit</string>
+    <string name="settings_save">Speichern</string>
+    <string name="action_tips_heading">✅ Aktions-Tipps</string>
+    <string name="action_tips_subtitle">Mach es – hak es ab.</string>
+    <string name="btn_confirm_action">✓  Erledigt</string>
+    <string name="btn_dismiss_action">✗  Überspringen</string>
 </resources>

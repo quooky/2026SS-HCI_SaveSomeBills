@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +17,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class TipsFragment extends Fragment {
 
@@ -31,14 +34,9 @@ public class TipsFragment extends Fragment {
         "Vermeide Vorheizen des Backofens, wenn es nicht zwingend nötig ist.",
         "Nutze einen Wasserkocher statt Herd zum Wasser erhitzen.",
         "Fülle Waschmaschine und Geschirrspüler immer komplett.",
-        "Halte Türen zu beheizten Räumen geschlossen, um Wärmeverlust zu vermeiden.",
         "Stelle deinen Kühlschrank auf 7°C und Gefrierfach auf -18°C ein.",
-        "Öffne den Kühlschrank möglichst kurz – jedes Öffnen verbraucht Energie.",
         "Nutze Mehrfachsteckdosen mit Schalter zur einfachen Stromtrennung.",
-        "Vermeide Standby-Modus – vollständig ausschalten spart jährlich viel Strom.",
         "Ein Ventilator verbraucht deutlich weniger Energie als eine Klimaanlage.",
-        "Platziere den Kühlschrank nicht neben Herd oder Heizung.",
-        "Reinige regelmäßig Filter von Geräten (z.B. Trockner), für bessere Effizienz.",
         "Nutze Energiesparprogramme bei Haushaltsgeräten."
     };
 
@@ -50,16 +48,14 @@ public class TipsFragment extends Fragment {
         "Reduziere die Bildschirmhelligkeit bei Handy und Laptop.",
         "Aktiviere den Energiesparmodus auf Smartphone und Laptop.",
         "Schalte deinen Router nachts aus, wenn du ihn nicht brauchst.",
-        "Moderne Geräte mit hoher Energieeffizienzklasse sparen langfristig Geld.",
         "Schalte deinen Fernseher komplett aus statt Standby.",
         "Nutze Eco-Modus bei Waschmaschine und Geschirrspüler.",
         "Lade Geräte nicht dauerhaft bis 100%, das spart Strom und Akku.",
-        "Verwende Timer oder Smart-Steckdosen für automatische Abschaltung.",
         "Drucker nur einschalten, wenn du ihn wirklich brauchst.",
-        "Vermeide dauerhaft angeschlossene externe Geräte am Laptop.",
-        "Nutze Energiesparfunktionen bei Fernsehern und Monitoren.",
         "Lade dein Smartphone nicht über Nacht – das spart Strom und schont den Akku."
     };
+
+    private ActionTipsPagerAdapter adapterAction;
 
     @Nullable
     @Override
@@ -73,9 +69,18 @@ public class TipsFragment extends Fragment {
 
         setupPager(view, R.id.pager_general, R.id.dots_general, generalTips);
         setupPager(view, R.id.pager_device,  R.id.dots_device,  deviceTips);
+        setupActionPager(view);
 
         return view;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapterAction != null) adapterAction.notifyDataSetChanged();
+    }
+
+    // ── Regular tip pager ─────────────────────────────────────────────────────
 
     private void setupPager(View root, int pagerId, int dotsId, List<TipsPagerAdapter.Tip> tips) {
         ViewPager2 pager = root.findViewById(pagerId);
@@ -90,12 +95,8 @@ public class TipsFragment extends Fragment {
         LinearLayout dots = root.findViewById(dotsId);
         setupDots(dots, tips.size());
         updateDots(dots, 0);
-
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                updateDots(dots, position);
-            }
+            @Override public void onPageSelected(int position) { updateDots(dots, position); }
         });
     }
 
@@ -104,16 +105,90 @@ public class TipsFragment extends Fragment {
         Collections.addAll(shuffled, source);
         Collections.shuffle(shuffled);
         List<TipsPagerAdapter.Tip> result = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < Math.min(count, shuffled.size()); i++) {
             result.add(new TipsPagerAdapter.Tip(category, shuffled.get(i)));
         }
         return result;
     }
 
+    // ── Action tip pager ──────────────────────────────────────────────────────
+
+    private void setupActionPager(View root) {
+        List<ActionTipsPagerAdapter.ActionTip> tips = buildActionTips();
+        if (tips.isEmpty()) return;
+
+        Set<String> confirmed = AppSettings.getConfirmedTips(requireContext());
+        adapterAction = new ActionTipsPagerAdapter(tips, confirmed);
+        adapterAction.setOnConfirmListener(tip -> {
+            String saving = AppSettings.formatEnergy(requireContext(), tip.savingKwhPerMonth);
+            Toast.makeText(requireContext(),
+                "Super! Du sparst ~" + saving + "/Monat 🎉",
+                Toast.LENGTH_SHORT).show();
+        });
+
+        ViewPager2 pager = root.findViewById(R.id.pager_action);
+        pager.setAdapter(adapterAction);
+        pager.setOffscreenPageLimit(1);
+        pager.setPageTransformer((page, position) -> {
+            float scale = 1f - 0.08f * Math.abs(position);
+            page.setScaleY(scale);
+            page.setAlpha(0.5f + (1f - Math.abs(position)) * 0.5f);
+        });
+
+        LinearLayout dots = root.findViewById(R.id.dots_action);
+        setupDots(dots, tips.size());
+        updateDots(dots, 0);
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override public void onPageSelected(int position) { updateDots(dots, position); }
+        });
+    }
+
+    private List<ActionTipsPagerAdapter.ActionTip> buildActionTips() {
+        List<ActionTipsPagerAdapter.ActionTip> tips = new ArrayList<>();
+
+        // Generate device-specific tips from saved devices
+        for (Device d : DeviceStorage.loadAll(requireContext())) {
+            if (d.wattStandby > 0) {
+                double kwhPerMonth = (d.wattStandby * 24.0 * 30) / 1000.0;
+                tips.add(new ActionTipsPagerAdapter.ActionTip(
+                    "standby_" + d.objectId,
+                    d.icon != null ? d.icon : "⚡",
+                    d.name + " vom Strom trennen",
+                    d.name + " verbraucht im Standby " + d.wattStandby + " W – einfach Stecker ziehen.",
+                    kwhPerMonth
+                ));
+            }
+        }
+
+        // Fallback hardcoded tips
+        if (tips.isEmpty()) {
+            tips.add(new ActionTipsPagerAdapter.ActionTip(
+                "tip_lights", "💡", "Licht ausschalten",
+                "Konsequent Licht aus beim Verlassen eines Raums.",
+                3.0));
+            tips.add(new ActionTipsPagerAdapter.ActionTip(
+                "tip_fridge", "🧊", "Kühlschrank auf 7°C stellen",
+                "Jeder Grad wärmer spart ~6% Energie.",
+                4.5));
+            tips.add(new ActionTipsPagerAdapter.ActionTip(
+                "tip_washing", "🧺", "Wäsche bei 30°C waschen",
+                "Spart bis zu 60% Energie gegenüber 60°C.",
+                5.0));
+            tips.add(new ActionTipsPagerAdapter.ActionTip(
+                "tip_router", "📡", "Router nachts ausschalten",
+                "8 Stunden weniger Betrieb = weniger Verbrauch.",
+                1.5));
+        }
+
+        return tips.subList(0, Math.min(tips.size(), 4));
+    }
+
+    // ── Dot indicators ────────────────────────────────────────────────────────
+
     private void setupDots(LinearLayout container, int count) {
         container.removeAllViews();
-        float dp = getResources().getDisplayMetrics().density;
-        int size = (int) (8 * dp);
+        float dp   = getResources().getDisplayMetrics().density;
+        int size   = (int) (8 * dp);
         int margin = (int) (5 * dp);
         for (int i = 0; i < count; i++) {
             View dot = new View(getContext());
@@ -128,7 +203,7 @@ public class TipsFragment extends Fragment {
     }
 
     private void updateDots(LinearLayout container, int activeIndex) {
-        TypedValue accent = new TypedValue();
+        TypedValue accent   = new TypedValue();
         TypedValue inactive = new TypedValue();
         requireContext().getTheme().resolveAttribute(R.attr.appColorAccent, accent, true);
         requireContext().getTheme().resolveAttribute(R.attr.appColorOnSurfaceVariant, inactive, true);
