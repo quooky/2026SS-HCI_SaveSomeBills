@@ -4,11 +4,13 @@ import android.content.res.AssetManager;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -31,12 +33,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.stream.Collectors;
 
 public class HomeFragment extends Fragment {
 
@@ -46,6 +49,9 @@ public class HomeFragment extends Fragment {
     private static final int MAX_ELEC_PRICE = 20;
 
     private Integer firstCheapestHour;
+
+    private View currentTimeLine;
+    private FrameLayout graphContainer;
 
     @Nullable
     @Override
@@ -81,7 +87,58 @@ public class HomeFragment extends Fragment {
             });
         }).start();
 
+        graphContainer = (FrameLayout) view.findViewById(R.id.electricity_graph_container).getParent();
+        currentTimeLine = view.findViewById(R.id.current_time_line);
+
         return view;
+    }
+
+    private void updateCurrentTimeLine() {
+        if (currentTimeLine == null || graphContainer == null) {
+            return;
+        }
+
+        // get current time
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = calendar.get(Calendar.MINUTE);
+
+        // cast timestamp to float
+        float currentTimeInHours = currentHour + (currentMinute / 60.0f);
+
+
+        float minHour = 0.0f;
+        float maxHour = 24.0f;
+
+
+        if (currentTimeInHours < minHour || currentTimeInHours > maxHour) {
+            currentTimeLine.setVisibility(View.GONE);
+            return;
+        }
+
+        // compute the position on a scale form 0 to 1
+        float position = (currentTimeInHours - minHour) / (maxHour - minHour);
+
+        // get the width of the container
+        graphContainer.post(() -> {
+            int containerWidth = graphContainer.getWidth();
+            if (containerWidth > 0) {
+                // compute absolute position on pixels
+                int linePosition = (int) (position * containerWidth);
+
+                // set the horizontal shift for the line
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) currentTimeLine.getLayoutParams();
+                if (params == null) {
+                    params = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.WRAP_CONTENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                    );
+                }
+                params.leftMargin = linePosition;
+                currentTimeLine.setLayoutParams(params);
+                currentTimeLine.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void setupPiePager(ViewPager2 pager, LinearLayout dotsContainer) {
@@ -232,6 +289,25 @@ public class HomeFragment extends Fragment {
         firstCheapestHour = startIndex;
     }
 
+    private List<Integer> loadData(String filename) {
+        List<Integer> data = new ArrayList<>();
+
+        File file = new File(requireContext().getFilesDir(), filename);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            String savedDate = reader.readLine();
+            String dataLine = reader.readLine();
+            if (dataLine != null) {
+                for (String val : dataLine.split(",")) {
+                    data.add(Integer.parseInt(val.trim()));
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            Log.e(TAG, "Error reading internal storage data", e);
+        }
+        return data;
+    }
+
+
     private List<Integer> loadData(String filename, boolean checkDate) {
         List<Integer> data = new ArrayList<>();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -271,7 +347,7 @@ public class HomeFragment extends Fragment {
         return data;
     }
 
-    private List<Integer> getElectricityPrices(String date) {
+    private Pair<List<Integer>, Boolean>  getElectricityPrices(String date) {
         List<Integer> hourlyAverages = new ArrayList<>();
         HttpURLConnection connection = null;
         try {
@@ -313,31 +389,33 @@ public class HomeFragment extends Fragment {
                         hourlyAverages.add(0);
                     }
                 }
+                return new Pair<>(hourlyAverages, true);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error fetching electricity prices from API", e);
         }
 
-        // Fallback to random data if API fails or returns no data
+        // Fallback to presaved data if API fails or returns no data
         if (hourlyAverages.size() < 24) {
-            hourlyAverages.clear();
-            Random random = new Random();
-            for (int i = 0; i < 24; i++) {
-                hourlyAverages.add(random.nextInt(21));
-            }
+            hourlyAverages = loadData("electricity_prices.txt");
         }
-        return hourlyAverages;
+        return new Pair<>(hourlyAverages, false);
     }
 
     private List<Integer> updateElectricityData(String filename, String today) {
-        List<Integer> newData = getElectricityPrices(today);
-
-        File file = new File(requireContext().getFilesDir(), filename);
-        try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
-            writer.println(today);
-            writer.println(newData);
-        } catch (IOException e) {
-            Log.e(TAG, "Error updating electricity data file", e);
+        Pair<List<Integer>, Boolean> updates = getElectricityPrices(today);
+        List<Integer> newData = updates.first;
+        Boolean upToDate = updates.second;
+        if (upToDate) { //if the fetched data is up to date, modify the file by writing the current date and the new data, otherwise read only
+            File file = new File(requireContext().getFilesDir(), filename);
+            try (PrintWriter writer = new PrintWriter(new FileOutputStream(file))) {
+                writer.println(today);
+                writer.println(newData.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(",")));
+            } catch (IOException e) {
+                Log.e(TAG, "Error updating electricity data file", e);
+            }
         }
         return newData;
     }
@@ -418,6 +496,8 @@ public class HomeFragment extends Fragment {
             bar.setBackgroundColor(color);
 
             container.addView(bar);
+
         }
+        updateCurrentTimeLine();
     }
 }
