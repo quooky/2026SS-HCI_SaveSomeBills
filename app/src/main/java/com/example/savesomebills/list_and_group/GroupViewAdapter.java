@@ -56,6 +56,7 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         holder.getName().setText(ob.getName());
         holder.getEnergy().setText(AppSettings.formatEnergy(holder.getEnergy().getContext(),0.001 * ob.getEnergy_amount() ) );
         holder.getIcon().setText(ob.getIcon());
+        holder.getCost().setText(ob.getUsage());
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onGroupClick(ob.getName());
         });
@@ -75,12 +76,19 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         TextView energy;
         TextView unit;
 
+        TextView cost;
+
         public ViewHolder(@NonNull View view) {
             super(view);
             this.name = view.findViewById(R.id.device_group_name);
             this.icon = view.findViewById(R.id.device_group_icon);
             this.energy = view.findViewById(R.id.device_group_energy);
             this.unit = view.findViewById(R.id.device_group_unit);
+            this.cost = view.findViewById(R.id.device_group_cost);
+        }
+
+        public TextView getCost() {
+            return cost;
         }
 
         public TextView getName() { return name; }

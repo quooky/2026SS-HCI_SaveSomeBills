@@ -11,6 +11,8 @@ public class Device {
     public float standbyHours;
     public int wattOn;
     public int wattStandby;
+    public String usage;
+    public String cost;
 
     public Device(String name, String groupId, float onHours, float standbyHours, int wattOn, int wattStandby, String icon) {
         this.objectId = UUID.randomUUID().toString();
@@ -21,5 +23,7 @@ public class Device {
         this.standbyHours = standbyHours;
         this.wattOn = wattOn;
         this.wattStandby = wattStandby;
+        this.usage = "";
+        this.cost = "";
     }
 }

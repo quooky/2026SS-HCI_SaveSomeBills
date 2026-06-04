@@ -1,22 +1,27 @@
 package com.example.savesomebills.list_and_group;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Group {
     List<Integer> id;
     String icon;
     String name;
-    int energy_amount;
+    float energy_amount;
     int groupid;
+    String usage;
 
-    public Group(List<Integer> id, String icon, String name, int energy_amount,int groupid) {
+
+
+
+
+    public Group(List<Integer> id, String icon, String name, int energy_amount, int groupid, String usage) {
         this.id = id;
 
         this.icon = icon;
         this.name = name;
         this.energy_amount = energy_amount;
         this.groupid =  groupid;
+        this.usage = usage;
     }
 
     public int getGroupid() {
@@ -39,7 +44,13 @@ public class Group {
         return name;
     }
 
-    public int getEnergy_amount() {
+
+    public float getEnergy_amount() {
         return energy_amount;
     }
+
+     public String getUsage() {    
+         return usage;             
+     }                             
+
 }

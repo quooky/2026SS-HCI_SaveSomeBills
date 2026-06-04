@@ -50,6 +50,8 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Device d = devices.get(position);
         holder.name.setText(d.name);
+        holder.usage.setText(d.usage);
+        holder.cost.setText(d.cost);
         holder.icon.setText(d.icon != null ? d.icon : "⚡"); //d.wattOn + " W"
         holder.energy.setText(AppSettings.formatEnergy(holder.energy.getContext(), d.wattOn*0.001));
         holder.editButton.setOnClickListener(v -> {
@@ -63,7 +65,7 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView    name, icon, energy;
+        TextView    name, icon, energy, usage,cost;
         ImageButton editButton;
 
         public ViewHolder(@NonNull View view) {
@@ -72,6 +74,8 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
             icon       = view.findViewById(R.id.device_list_icon);
             energy     = view.findViewById(R.id.device_list_energy);
             editButton = view.findViewById(R.id.device_list_edit);
+            usage = view.findViewById(R.id.device_list_usage);
+            cost = view.findViewById(R.id.device_list_cost);
         }
     }
 }

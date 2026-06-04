@@ -101,7 +101,7 @@ public class GroupDeviceFragment extends Fragment {
             for (Device d : entry.getValue()) totalWatt += d.wattOn;
 
             String icon = prefs.getString("icon_" + entry.getKey(), "🏠");
-            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt , 0));
+            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt, 0, ""));
         }
         return groups;
     }
