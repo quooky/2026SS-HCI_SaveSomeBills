@@ -113,14 +113,17 @@ id btn_unit_kwh
 id btn_unit_phone
 id cheapest_hours_text
 id current_time_line
+id device_group_cost
 id device_group_energy
 id device_group_icon
 id device_group_name
 id device_group_unit
+id device_list_cost
 id device_list_edit
 id device_list_energy
 id device_list_icon
 id device_list_name
+id device_list_usage
 id dots_action
 id dots_device
 id dots_general

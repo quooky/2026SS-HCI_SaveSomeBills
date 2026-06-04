@@ -63,8 +63,8 @@ public class DeviceStorage {
                 Device d = new Device(
                     obj.getString("name"),
                     obj.getString("groupId"),
-                    obj.getInt("onHours"),
-                    obj.getInt("standbyHours"),
+                    (float) obj.getDouble("onHours"),
+                    (float) obj.getDouble("standbyHours"),
                     obj.optInt("wattOn", 0),
                     obj.optInt("wattStandby", 0),
                     obj.optString("icon", "⚡")

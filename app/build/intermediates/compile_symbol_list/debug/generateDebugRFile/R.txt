@@ -112,14 +112,17 @@ int id btn_unit_kwh 0x0
 int id btn_unit_phone 0x0
 int id cheapest_hours_text 0x0
 int id current_time_line 0x0
+int id device_group_cost 0x0
 int id device_group_energy 0x0
 int id device_group_icon 0x0
 int id device_group_name 0x0
 int id device_group_unit 0x0
+int id device_list_cost 0x0
 int id device_list_edit 0x0
 int id device_list_energy 0x0
 int id device_list_icon 0x0
 int id device_list_name 0x0
+int id device_list_usage 0x0
 int id dots_action 0x0
 int id dots_device 0x0
 int id dots_general 0x0

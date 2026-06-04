@@ -26,6 +26,7 @@ import java.util.Map;
 public class GroupDeviceFragment extends Fragment {
 
     private static final String PREFS_GROUP_ICONS = "group_icons";
+    private GroupViewAdapter adapter;
 
     @Nullable
     @Override
@@ -39,7 +40,7 @@ public class GroupDeviceFragment extends Fragment {
 
         List<Group> groups = buildGroups(prefs);
 
-        GroupViewAdapter adapter = new GroupViewAdapter(groups);
+        adapter = new GroupViewAdapter(groups);
 
         adapter.setOnGroupClickListener(groupId ->
                 requireActivity().getSupportFragmentManager()
@@ -76,6 +77,16 @@ public class GroupDeviceFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            SharedPreferences prefs = requireActivity()
+                    .getSharedPreferences(PREFS_GROUP_ICONS, Context.MODE_PRIVATE);
+            adapter.updateData(buildGroups(prefs));
+        }
+    }
+
     private List<Group> buildGroups(SharedPreferences prefs) {
         List<Device> devices = DeviceStorage.loadAll(requireContext());
 
@@ -90,7 +101,7 @@ public class GroupDeviceFragment extends Fragment {
             for (Device d : entry.getValue()) totalWatt += d.wattOn;
 
             String icon = prefs.getString("icon_" + entry.getKey(), "🏠");
-            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt , 0));
+            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt, 0, ""));
         }
         return groups;
     }
