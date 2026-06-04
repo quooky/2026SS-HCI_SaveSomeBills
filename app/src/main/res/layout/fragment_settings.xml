@@ -15,14 +15,6 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/btn_settings_back"
-            android:layout_width="@dimen/icon_button_size"
-            android:layout_height="@dimen/icon_button_size"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_arrow_back"
-            app:tint="?attr/appColorOnSurface" />
-
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -138,6 +130,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="kWh"
+                    android:textColor="?attr/appColorOnSurface"
                     android:textSize="12sp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -146,6 +139,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:textColor="?attr/appColorOnSurface"
                     android:text="📱 Handy"
                     android:textSize="12sp" />
 
@@ -155,6 +149,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:textColor="?attr/appColorOnSurface"
                     android:text="⚡ E-Auto"
                     android:textSize="12sp" />
 

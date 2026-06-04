@@ -25,9 +25,6 @@ public class SettingsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        view.findViewById(R.id.btn_settings_back).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().popBackStack()
-        );
 
         // Savings goal
         TextInputEditText inputGoal = view.findViewById(R.id.input_savings_goal);

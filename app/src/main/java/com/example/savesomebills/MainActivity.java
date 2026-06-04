@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_tips) {
                 loadFragment(new TipsFragment());
                 return true;
+            } else if (id == R.id.nav_settings) {
+                loadFragment(new SettingsFragment());
+                return true;
             }
 
             return false;
