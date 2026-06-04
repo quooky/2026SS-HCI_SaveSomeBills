@@ -50,10 +50,15 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Device d = devices.get(position);
         holder.name.setText(d.name);
-        holder.usage.setText(d.usage);
-        holder.cost.setText(d.cost);
-        holder.icon.setText(d.icon != null ? d.icon : "⚡"); //d.wattOn + " W"
-        holder.energy.setText(AppSettings.formatEnergy(holder.energy.getContext(), d.wattOn*0.001));
+        holder.icon.setText(d.icon != null ? d.icon : "⚡");
+        holder.energy.setText(AppSettings.formatEnergy(holder.energy.getContext(), d.wattOn * 0.001));
+
+        String hoursStr = d.onHours == (int) d.onHours
+                ? String.valueOf((int) d.onHours) : String.valueOf(d.onHours);
+        holder.usage.setText(hoursStr + " h/Tag");
+
+        double costPerDay = ((d.onHours * d.wattOn + d.standbyHours * d.wattStandby) / 1000.0) * 0.30;
+        holder.cost.setText(String.format("%.2f €/Tag", costPerDay));
         holder.editButton.setOnClickListener(v -> {
             if (editListener != null) editListener.onEditClick(d);
         });
