@@ -38,6 +38,11 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         this.group_list = id_list;
     }
 
+    public void updateData(List<Group> newGroups) {
+        group_list = newGroups;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

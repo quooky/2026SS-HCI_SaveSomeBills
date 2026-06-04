@@ -120,8 +120,6 @@ public class AddDevice extends AppCompatActivity {
             selectedIcon = editDevice.icon;
             tvDeviceIcon.setText(selectedIcon);
             inputName.setText(editDevice.name);
-            inputOnHours.setText(String.valueOf(editDevice.onHours));
-            inputStandbyHours.setText(String.valueOf(editDevice.standbyHours));
             wattOn      = editDevice.wattOn;
             wattStandby = editDevice.wattStandby;
             if (wattOn > 0) {
@@ -131,15 +129,18 @@ public class AddDevice extends AppCompatActivity {
                 tvWattChevron.setText("▼");
             }
             if (wattStandby > 0) {
-                sliderWattStandby.setValue(Math.min(wattStandby, 100));
+                sliderWattStandby.setValue(Math.min(wattStandby, 25));
                 tvWattStandbyValue.setText(wattStandby + " W");
             }
+            inputOnHours.setText(formatHours(editDevice.onHours));
+            inputStandbyHours.setText(formatHours(editDevice.standbyHours));
             if (rooms.contains(editDevice.groupId)) {
                 spinnerRoom.setSelection(rooms.indexOf(editDevice.groupId) + 1);
             }
             // Turn Cancel into a Delete button
             btnCancel.setText("Löschen");
             btnCancel.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.red_40)));
+            gradientBarContainer.post(() -> updateForecast());
         }
 
         // ON hours → auto-calc standby, clamp 0-24
@@ -151,7 +152,7 @@ public class AddDevice extends AppCompatActivity {
                 String t = s.toString().trim();
                 if (!t.isEmpty()) {
                     try {
-                        int val = Integer.parseInt(t);
+                        float val = Float.parseFloat(t);
                         if (val > 24) {
                             updatingHours = true;
                             inputOnHours.setText("24");
@@ -160,7 +161,7 @@ public class AddDevice extends AppCompatActivity {
                             val = 24;
                         }
                         updatingHours = true;
-                        inputStandbyHours.setText(String.valueOf(24 - val));
+                        inputStandbyHours.setText(formatHours(24f - val));
                         updatingHours = false;
                     } catch (NumberFormatException ignored) {}
                 }
@@ -176,7 +177,7 @@ public class AddDevice extends AppCompatActivity {
                 String t = s.toString().trim();
                 if (!t.isEmpty()) {
                     try {
-                        int val = Integer.parseInt(t);
+                        float val = Float.parseFloat(t);
                         if (val > 24) {
                             updatingHours = true;
                             inputStandbyHours.setText("24");
@@ -202,6 +203,30 @@ public class AddDevice extends AppCompatActivity {
 
         findViewById(R.id.imageButton3).setOnClickListener(v -> finish());
 
+        findViewById(R.id.imageButton2).setOnClickListener(v ->
+            new AlertDialog.Builder(this)
+                .setTitle("Gerät hinzufügen – Hilfe")
+                .setMessage(
+                    "⏱ In Betrieb / Standby\n" +
+                    "• In Betrieb = Stunden pro Tag, in denen das Gerät aktiv genutzt wird\n" +
+                    "• Standby = Stunden, in denen es eingesteckt aber inaktiv ist\n" +
+                    "• Beide Werte zusammen dürfen max. 24h ergeben\n\n" +
+                    "⚡ Watt-Werte\n" +
+                    "• Betrieb (W) = Stromverbrauch während der Nutzung\n" +
+                    "• Standby (W) = Verbrauch im Ruhezustand (meist deutlich geringer)\n" +
+                    "• Typische Werte: Laptop 30–60 W, TV 80–150 W, Kühlschrank 100–200 W\n\n" +
+                    "📷 EasyScan\n" +
+                    "• Fotografiere das gesamte Gerät\n" +
+                    "• Die App schätzt automatisch den Stromverbrauch\n" +
+                    "• Das Foto wird nach der Analyse sofort gelöscht\n\n" +
+                    "📊 Kostenvorschau\n" +
+                    "• Zeigt die geschätzten Kosten pro Stunde und pro Tag\n" +
+                    "• Berechnung: (Watt × Stunden) ÷ 1000 × Strompreis (0,30 €/kWh)"
+                )
+                .setPositiveButton("OK", null)
+                .show()
+        );
+
         btnCancel.setOnClickListener(v -> {
             if (editDevice != null) {
                 new AlertDialog.Builder(this)
@@ -220,8 +245,15 @@ public class AddDevice extends AppCompatActivity {
         });
 
         findViewById(R.id.btn_easy_scan).setOnClickListener(v -> {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(intent, REQUEST_CAMERA);
+            new AlertDialog.Builder(this)
+                    .setTitle("EasyScan")
+                    .setMessage("Fotografiere das gesamte Gerät. Anhand des Fotos schätzen wir automatisch den Stromverbrauch. Das Bild wird nach der Analyse sofort gelöscht.")
+                    .setPositiveButton("Scannen", (dialog, which) -> {
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(intent, REQUEST_CAMERA);
+                    })
+                    .setNegativeButton("Abbrechen", null)
+                    .show();
         });
 
         findViewById(R.id.btn_confirm).setOnClickListener(v -> {
@@ -239,11 +271,15 @@ public class AddDevice extends AppCompatActivity {
                 Toast.makeText(this, "Bitte einen Raum auswählen", Toast.LENGTH_SHORT).show();
                 return;
             }
-            int onHours      = Integer.parseInt(onStr);
-            int standbyHours = Integer.parseInt(sbStr);
+            float onHours      = Float.parseFloat(onStr);
+            float standbyHours = Float.parseFloat(sbStr);
 
             if (onHours + standbyHours > 24) {
                 Toast.makeText(this, "ON + Standby darf nicht mehr als 24h sein", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (wattOn == 0) {
+                Toast.makeText(this, "Bitte einen Watt-Wert eingeben", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -356,7 +392,7 @@ public class AddDevice extends AppCompatActivity {
             int scannedOn      = Math.round((10 + random.nextInt(491)) / 5.0f) * 5;
             int scannedStandby = 1  + random.nextInt(20);
             sliderWattOn.setValue(Math.min(scannedOn, 2000));
-            sliderWattStandby.setValue(Math.min(scannedStandby, 100));
+            sliderWattStandby.setValue(Math.min(scannedStandby, 25));
             tvWattOnValue.setText(scannedOn + " W");
             tvWattStandbyValue.setText(scannedStandby + " W");
             layoutWattManual.setVisibility(View.VISIBLE);
@@ -364,11 +400,15 @@ public class AddDevice extends AppCompatActivity {
         }
     }
 
+    private String formatHours(float hours) {
+        return hours == (int) hours ? String.valueOf((int) hours) : String.valueOf(hours);
+    }
+
     private void updateForecast() {
         if (wattOn == 0) return;
         try {
-            int onH  = inputOnHours.getText().toString().isEmpty() ? 0 : Integer.parseInt(inputOnHours.getText().toString());
-            int sbH  = inputStandbyHours.getText().toString().isEmpty() ? 0 : Integer.parseInt(inputStandbyHours.getText().toString());
+            float onH  = inputOnHours.getText().toString().isEmpty() ? 0 : Float.parseFloat(inputOnHours.getText().toString());
+            float sbH  = inputStandbyHours.getText().toString().isEmpty() ? 0 : Float.parseFloat(inputStandbyHours.getText().toString());
             double costPerHour = (wattOn / 1000.0) * PRICE_PER_KWH;
             double costPerDay  = ((onH * wattOn + sbH * wattStandby) / 1000.0) * PRICE_PER_KWH;
             tvCostPerHour.setText(String.format("%.2f €/h  |  %.2f €/Tag", costPerHour, costPerDay));
