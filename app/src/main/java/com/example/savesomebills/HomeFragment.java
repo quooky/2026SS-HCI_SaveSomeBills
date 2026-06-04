@@ -64,12 +64,6 @@ public class HomeFragment extends Fragment {
         ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
         LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
-        view.findViewById(R.id.btn_settings).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SettingsFragment())
-                .addToBackStack(null)
-                .commit()
-        );
 
         // Load data in background to avoid NetworkOnMainThreadException
         new Thread(() -> {
