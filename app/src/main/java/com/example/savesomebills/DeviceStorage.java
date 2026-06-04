@@ -2,8 +2,9 @@ package com.example.savesomebills;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -21,6 +22,11 @@ public class DeviceStorage {
         List<Device> devices = loadAll(context);
         devices.add(device);
         writeAll(context, devices);
+    }
+    @NonNull
+    public static List<Device> get_device(Context context){
+        List<Device> devices = loadAll(context);
+        return devices;
     }
 
     public static void update(Context context, Device device) {

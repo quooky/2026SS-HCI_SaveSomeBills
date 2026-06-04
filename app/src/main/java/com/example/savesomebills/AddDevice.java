@@ -337,6 +337,18 @@ public class AddDevice extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        var list = DeviceStorage.get_device(this.getBaseContext());
+        ArrayList<String> device_group_id = new ArrayList<>();
+        for (var i : list){
+            device_group_id.add(i.groupId);
+        }
+        ArrayList<String> temp = new ArrayList<>();
+        for ( String i : rooms){
+            if( device_group_id.contains(i)){
+                temp.add(i);
+            }
+        }
+        rooms = temp;
     }
 
     private void saveRooms() {
