@@ -93,7 +93,12 @@ public class ListDeviceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (adapter != null) adapter.updateData(buildItems(groupId));
+        List<Device> items = buildItems(groupId);
+        if (items.isEmpty()) {
+            requireActivity().getSupportFragmentManager().popBackStack();
+            return;
+        }
+        if (adapter != null) adapter.updateData(items);
     }
 
     private List<Device> buildItems(String groupId) {
