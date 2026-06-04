@@ -9,7 +9,7 @@
     <string name="threshold_value">50</string>
     <string name="max_value">100</string>
     <string name="min_value">0</string>
-    <string name="savings_target">Monatliches Sparziel: 50 €</string>
+    <string name="savings_target">Monatliches Sparziel: %1$d €</string>
     <string name="greeting">Servus!</string>
     <string name="electricity_prices_today">Happy Hours</string>
     <string name="elec_unit">cent/kWh</string>
@@ -31,6 +31,7 @@
     <string name="settings_goal_suffix">€ / Monat</string>
     <string name="settings_unit_label">Anzeigeeinheit</string>
     <string name="settings_save">Speichern</string>
+    <string name="info_content_description">Info</string>
     <string name="action_tips_heading">✅ Aktions-Tipps</string>
     <string name="action_tips_subtitle">Mach es – hak es ab.</string>
     <string name="btn_confirm_action">✓  Erledigt</string>

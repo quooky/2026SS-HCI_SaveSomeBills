@@ -71,6 +71,10 @@ public class HomeFragment extends Fragment {
                 .commit()
         );
 
+        view.findViewById(R.id.btn_info).setOnClickListener(v -> {
+            // Placeholder for info action
+        });
+
         // Load data in background to avoid NetworkOnMainThreadException
         new Thread(() -> {
             List<Integer> histData = loadData("savings_data.txt", false);
@@ -80,6 +84,10 @@ public class HomeFragment extends Fragment {
             getActivity().runOnUiThread(() -> {
                 if (getView() == null) return;
                 int threshold = (int) AppSettings.getSavingsGoal(requireContext());
+                TextView histTitle = view.findViewById(R.id.hist_title);
+                if (histTitle != null) {
+                    histTitle.setText(getString(R.string.savings_target, threshold));
+                }
                 if (histogramContainer != null) {
                     populateHistogram(histogramContainer, histData, histogramContainer.getHeight(), threshold);
                     setupThresholdLine(view, histogramContainer.getHeight(), threshold);
