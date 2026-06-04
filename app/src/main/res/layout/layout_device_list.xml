@@ -56,6 +56,32 @@
             app:layout_constraintStart_toEndOf="@+id/device_list_icon"
             app:layout_constraintTop_toBottomOf="@+id/device_list_name" />
 
+        <TextView
+            android:id="@+id/device_list_usage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="0 h/t"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/appColorOnSurfaceVariant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/device_list_energy"
+            app:layout_constraintTop_toBottomOf="@+id/device_list_name"
+            app:layout_constraintVertical_bias="0.428" />
+
+        <TextView
+            android:id="@+id/device_list_cost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="0 $/h"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/appColorOnSurfaceVariant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/device_list_usage"
+            app:layout_constraintTop_toBottomOf="@+id/device_list_name"
+            app:layout_constraintVertical_bias="0.428" />
+
         <ImageButton
             android:id="@+id/device_list_edit"
             android:layout_width="@dimen/icon_button_size"
