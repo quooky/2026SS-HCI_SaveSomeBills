@@ -95,4 +95,12 @@ public class AppSettings {
     private static String today() {
         return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
     }
+    public static void unconfirmTip(Context context, String tipId) {
+        Set<String> confirmed = getConfirmedTips(context);
+        confirmed.remove(tipId);
+        prefs(context).edit()
+                .putStringSet(KEY_CONFIRMED_TIPS, confirmed)
+                .putString(KEY_CONFIRMED_DATE, today())
+                .apply();
+    }
 }

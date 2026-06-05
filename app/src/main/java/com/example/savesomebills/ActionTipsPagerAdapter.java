@@ -1,5 +1,6 @@
 package com.example.savesomebills;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,12 +36,17 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
     }
 
     public interface OnConfirmListener {
-        void onConfirm(ActionTip tip);
+        void onConfirm(ActionTip tip, boolean isConfirmed);
+    }
+
+    public interface OnDismissListener {
+        void onDismiss(int position);
     }
 
     private final List<ActionTip> tips;
     private final Set<String> confirmed;
     private OnConfirmListener confirmListener;
+    private OnDismissListener dismissListener;
 
     public ActionTipsPagerAdapter(List<ActionTip> tips, Set<String> alreadyConfirmed) {
         this.tips = tips;
@@ -49,6 +55,10 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
 
     public void setOnConfirmListener(OnConfirmListener l) {
         this.confirmListener = l;
+    }
+
+    public void setOnDismissListener(OnDismissListener l) {
+        this.dismissListener = l;
     }
 
     @NonNull
@@ -74,43 +84,61 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
         applyConfirmedState(holder, isConfirmed);
 
         holder.btnConfirm.setOnClickListener(v -> {
-            if (!confirmed.contains(tip.id)) {
+            if (confirmed.contains(tip.id)) {
+                confirmed.remove(tip.id);
+                AppSettings.unconfirmTip(v.getContext(), tip.id);
+                AppSettings.addSavedKwh(v.getContext(), -tip.savingKwhPerMonth);
+                applyConfirmedState(holder, false);
+
+                if (confirmListener != null) {
+                    confirmListener.onConfirm(tip, false);
+                }
+            } else {
                 confirmed.add(tip.id);
-
                 AppSettings.confirmTip(v.getContext(), tip.id);
-
-                // NEU: Ersparnis speichern, damit Home den rechten Balken erhöhen kann
                 AppSettings.addSavedKwh(v.getContext(), tip.savingKwhPerMonth);
-
                 applyConfirmedState(holder, true);
 
                 if (confirmListener != null) {
-                    confirmListener.onConfirm(tip);
+                    confirmListener.onConfirm(tip, true);
                 }
             }
         });
 
         holder.btnDismiss.setOnClickListener(v -> {
-            // Dismissing just does nothing visually — user can swipe to next card
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION && dismissListener != null) {
+                dismissListener.onDismiss(pos);
+            }
         });
     }
 
-    private void applyConfirmedState(@NonNull ViewHolder holder, boolean confirmed) {
+    private void applyConfirmedState(@NonNull ViewHolder holder, boolean confirmedState) {
         String savingText = holder.confirmSavingStr != null
                 ? holder.confirmSavingStr
                 : holder.itemView.getContext().getString(R.string.btn_confirm_action);
 
         holder.btnConfirm.setText(savingText);
 
-        if (confirmed) {
-            holder.btnConfirm.setEnabled(false);
+        if (confirmedState) {
+            holder.btnConfirm.setEnabled(true);
+
             int green = holder.itemView.getContext().getColor(R.color.green_40);
             holder.btnConfirm.setBackgroundTintList(ColorStateList.valueOf(green));
             holder.card.setStrokeColor(green);
-            holder.card.setStrokeWidth(2);
+            holder.card.setStrokeWidth(dp(holder.itemView.getContext(), 4));
         } else {
             holder.btnConfirm.setEnabled(true);
+
+            int teal = holder.itemView.getContext().getColor(R.color.teal_40);
+            holder.btnConfirm.setBackgroundTintList(ColorStateList.valueOf(teal));
+            holder.card.setStrokeColor(teal);
+            holder.card.setStrokeWidth(dp(holder.itemView.getContext(), 1));
         }
+    }
+
+    private int dp(Context context, int value) {
+        return (int) (value * context.getResources().getDisplayMetrics().density);
     }
 
     @Override
