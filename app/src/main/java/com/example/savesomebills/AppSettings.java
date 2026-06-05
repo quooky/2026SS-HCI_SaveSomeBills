@@ -16,15 +16,14 @@ public class AppSettings {
     public  static final String KEY_ENERGY_UNIT     = "energy_unit";
     private static final String KEY_CONFIRMED_TIPS  = "confirmed_tips";
     private static final String KEY_CONFIRMED_DATE  = "confirmed_tips_date";
+    private static final String KEY_TOTAL_SAVED_KWH = "total_saved_kwh";
 
     public static final String UNIT_KWH   = "kwh";
     public static final String UNIT_PHONE = "phone";
     public static final String UNIT_EV    = "ev";
 
-    private static final double WH_PER_PHONE = 15.0;  // 15 Wh per phone charge
-    private static final double KM_PER_KWH   = 6.0;   // 6 km per kWh for typical EV
-
-    // ── Savings goal ──────────────────────────────────────────────────────────
+    private static final double WH_PER_PHONE = 15.0;
+    private static final double KM_PER_KWH   = 6.0;
 
     public static float getSavingsGoal(Context context) {
         return prefs(context).getFloat(KEY_SAVINGS_GOAL, 50f);
@@ -34,8 +33,6 @@ public class AppSettings {
         prefs(context).edit().putFloat(KEY_SAVINGS_GOAL, goal).apply();
     }
 
-    // ── Energy unit ───────────────────────────────────────────────────────────
-
     public static String getEnergyUnit(Context context) {
         return prefs(context).getString(KEY_ENERGY_UNIT, UNIT_KWH);
     }
@@ -44,7 +41,6 @@ public class AppSettings {
         prefs(context).edit().putString(KEY_ENERGY_UNIT, unit).apply();
     }
 
-    /** Format a kWh value in the user's chosen unit. */
     public static String formatEnergy(Context context, double kwh) {
         switch (getEnergyUnit(context)) {
             case UNIT_PHONE: {
@@ -60,12 +56,13 @@ public class AppSettings {
         }
     }
 
-    // ── Action tip confirmations (daily reset) ────────────────────────────────
-
     public static Set<String> getConfirmedTips(Context context) {
         SharedPreferences p = prefs(context);
         if (!today().equals(p.getString(KEY_CONFIRMED_DATE, ""))) {
-            p.edit().remove(KEY_CONFIRMED_TIPS).putString(KEY_CONFIRMED_DATE, today()).apply();
+            p.edit()
+                    .remove(KEY_CONFIRMED_TIPS)
+                    .putString(KEY_CONFIRMED_DATE, today())
+                    .apply();
             return new HashSet<>();
         }
         return new HashSet<>(p.getStringSet(KEY_CONFIRMED_TIPS, new HashSet<>()));
@@ -75,12 +72,21 @@ public class AppSettings {
         Set<String> confirmed = getConfirmedTips(context);
         confirmed.add(tipId);
         prefs(context).edit()
-            .putStringSet(KEY_CONFIRMED_TIPS, confirmed)
-            .putString(KEY_CONFIRMED_DATE, today())
-            .apply();
+                .putStringSet(KEY_CONFIRMED_TIPS, confirmed)
+                .putString(KEY_CONFIRMED_DATE, today())
+                .apply();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    public static void addSavedKwh(Context context, double kwh) {
+        float current = prefs(context).getFloat(KEY_TOTAL_SAVED_KWH, 0f);
+        prefs(context).edit()
+                .putFloat(KEY_TOTAL_SAVED_KWH, current + (float) kwh)
+                .apply();
+    }
+
+    public static float getTotalSavedKwh(Context context) {
+        return prefs(context).getFloat(KEY_TOTAL_SAVED_KWH, 0f);
+    }
 
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

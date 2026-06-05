@@ -26,10 +26,10 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
         public final double savingKwhPerMonth;
 
         public ActionTip(String id, String emoji, String title, String description, double savingKwhPerMonth) {
-            this.id                = id;
-            this.emoji             = emoji;
-            this.title             = title;
-            this.description       = description;
+            this.id = id;
+            this.emoji = emoji;
+            this.title = title;
+            this.description = description;
             this.savingKwhPerMonth = savingKwhPerMonth;
         }
     }
@@ -38,12 +38,12 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
         void onConfirm(ActionTip tip);
     }
 
-    private final List<ActionTip>  tips;
-    private final Set<String>      confirmed;
-    private       OnConfirmListener confirmListener;
+    private final List<ActionTip> tips;
+    private final Set<String> confirmed;
+    private OnConfirmListener confirmListener;
 
     public ActionTipsPagerAdapter(List<ActionTip> tips, Set<String> alreadyConfirmed) {
-        this.tips      = tips;
+        this.tips = tips;
         this.confirmed = new HashSet<>(alreadyConfirmed);
     }
 
@@ -55,7 +55,7 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_action_tip_card, parent, false);
+                .inflate(R.layout.item_action_tip_card, parent, false);
         return new ViewHolder(v);
     }
 
@@ -65,6 +65,7 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
 
         holder.emoji.setText(tip.emoji);
         holder.title.setText(tip.title);
+        holder.description.setText(tip.description);
 
         String savingStr = AppSettings.formatEnergy(holder.itemView.getContext(), tip.savingKwhPerMonth);
         holder.confirmSavingStr = savingStr + " sparen";
@@ -75,9 +76,17 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
         holder.btnConfirm.setOnClickListener(v -> {
             if (!confirmed.contains(tip.id)) {
                 confirmed.add(tip.id);
+
                 AppSettings.confirmTip(v.getContext(), tip.id);
+
+                // NEU: Ersparnis speichern, damit Home den rechten Balken erhöhen kann
+                AppSettings.addSavedKwh(v.getContext(), tip.savingKwhPerMonth);
+
                 applyConfirmedState(holder, true);
-                if (confirmListener != null) confirmListener.onConfirm(tip);
+
+                if (confirmListener != null) {
+                    confirmListener.onConfirm(tip);
+                }
             }
         });
 
@@ -88,9 +97,11 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
 
     private void applyConfirmedState(@NonNull ViewHolder holder, boolean confirmed) {
         String savingText = holder.confirmSavingStr != null
-            ? holder.confirmSavingStr
-            : holder.itemView.getContext().getString(R.string.btn_confirm_action);
+                ? holder.confirmSavingStr
+                : holder.itemView.getContext().getString(R.string.btn_confirm_action);
+
         holder.btnConfirm.setText(savingText);
+
         if (confirmed) {
             holder.btnConfirm.setEnabled(false);
             int green = holder.itemView.getContext().getColor(R.color.green_40);
@@ -109,19 +120,19 @@ public class ActionTipsPagerAdapter extends RecyclerView.Adapter<ActionTipsPager
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView card;
-        TextView         emoji, title, description, saving;
-        MaterialButton   btnConfirm, btnDismiss;
-        String           confirmSavingStr;
+        TextView emoji, title, description, saving;
+        MaterialButton btnConfirm, btnDismiss;
+        String confirmSavingStr;
 
         ViewHolder(@NonNull View v) {
             super(v);
-            card        = (MaterialCardView) v;
-            emoji       = v.findViewById(R.id.tv_action_emoji);
-            title       = v.findViewById(R.id.tv_action_title);
+            card = (MaterialCardView) v;
+            emoji = v.findViewById(R.id.tv_action_emoji);
+            title = v.findViewById(R.id.tv_action_title);
             description = v.findViewById(R.id.tv_action_desc);
-            saving      = v.findViewById(R.id.tv_action_saving);
-            btnConfirm  = v.findViewById(R.id.btn_action_confirm);
-            btnDismiss  = v.findViewById(R.id.btn_action_dismiss);
+            saving = v.findViewById(R.id.tv_action_saving);
+            btnConfirm = v.findViewById(R.id.btn_action_confirm);
+            btnDismiss = v.findViewById(R.id.btn_action_dismiss);
         }
     }
 }
