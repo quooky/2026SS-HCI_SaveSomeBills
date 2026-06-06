@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import androidx.appcompat.app.AlertDialog;
 
 public class HomeFragment extends Fragment {
 
@@ -66,9 +67,33 @@ public class HomeFragment extends Fragment {
         ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
         LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
-        view.findViewById(R.id.btn_info).setOnClickListener(v -> {
-            // Placeholder for info action
-        });
+        view.findViewById(R.id.btn_settings).setOnClickListener(v ->
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        );
+
+        view.findViewById(R.id.btn_info).setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("ℹ️ So funktioniert der Homescreen")
+                        .setMessage(
+                                "Hier siehst du eine Übersicht über dein Sparziel und deinen Stromverbrauch.\n\n" +
+
+                                        "📊 Monatliches Sparziel\n" +
+                                        "Die Balken zeigen deine geschätzten Einsparungen der letzten Monate. " +
+                                        "Die gestrichelte Linie zeigt dein eingestelltes monatliches Sparziel.\n\n" +
+
+                                        "⚡ Happy Hours\n" +
+                                        "Hier werden günstige Stromzeiten angezeigt. " +
+                                        "In diesen Stunden lohnt es sich besonders, Geräte wie Waschmaschine oder Geschirrspüler zu nutzen.\n\n" +
+
+                                        "🏠 Geräteverbrauch\n" +
+                                        "Dieser Bereich zeigt die Verteilung deines Verbrauchs nach Geräten oder Gruppen, sobald Geräte hinzugefügt wurden."
+                        )
+                        .setPositiveButton("Verstanden", null)
+                        .show()
+        );
 
         new Thread(() -> {
             final List<Integer> histData =
