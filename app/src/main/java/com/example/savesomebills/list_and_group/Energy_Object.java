@@ -10,12 +10,18 @@ public class Energy_Object {
     String name;
     String energy_amount;
     int id;
+    String usage;
 
-    public Energy_Object(String icon, String name, String energy_amount,int id) {
+    public Energy_Object(String icon, String name, String energy_amount,int id, String usage) {
         this.icon = icon;
         this.name = name;
         this.energy_amount = energy_amount;
         this.id = id;
+        this.usage = usage;
+    }
+
+    public String getUsage() {
+        return usage;
     }
 
     public int getId() {

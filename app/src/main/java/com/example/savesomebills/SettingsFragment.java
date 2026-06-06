@@ -1,5 +1,6 @@
 package com.example.savesomebills;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,10 +24,34 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        view.findViewById(R.id.btn_settings_back).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().popBackStack()
+        // Info-Button für Anzeigeeinheit
+        view.findViewById(R.id.btn_unit_info).setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Anzeigeeinheit")
+                        .setMessage(
+                                "⚡ kWh (Kilowattstunde)\n" +
+                                        "Die Standardeinheit für elektrische Energie. " +
+                                        "1 kWh entspricht 1.000 Watt, die eine Stunde lang verbraucht werden – " +
+                                        "z. B. ein Haartrockner auf voller Stufe.\n\n" +
+
+                                        "📱 Handy-Ladungen\n" +
+                                        "Zeigt den Verbrauch als Anzahl von Smartphone-Ladungen an. " +
+                                        "Eine typische Akkuladung verbraucht ca. 15 Wh, " +
+                                        "also entspricht 1 kWh ungefähr 67 Ladungen.\n\n" +
+
+                                        "🚗 E-Auto (km)\n" +
+                                        "Zeigt, wie weit ein Elektroauto mit dieser Energiemenge fahren könnte. " +
+                                        "Ein typisches E-Auto verbraucht ca. 15–20 kWh pro 100 km, " +
+                                        "also entspricht 1 kWh ungefähr 6 km Reichweite.\n\n" +
+
+                                        "ℹ️ Die Auswahl verändert nur die Darstellung der Werte. " +
+                                        "Die Berechnung der Energieeinsparungen bleibt unverändert."
+                        )
+                        .setPositiveButton("OK", null)
+                        .show()
         );
 
         // Savings goal
@@ -36,51 +61,92 @@ public class SettingsFragment extends Fragment {
 
         // Energy unit toggle
         MaterialButtonToggleGroup toggleUnit = view.findViewById(R.id.toggle_unit);
+
         String unit = AppSettings.getEnergyUnit(requireContext());
         switch (unit) {
-            case AppSettings.UNIT_PHONE: toggleUnit.check(R.id.btn_unit_phone); break;
-            case AppSettings.UNIT_EV:    toggleUnit.check(R.id.btn_unit_ev);    break;
-            default:                     toggleUnit.check(R.id.btn_unit_kwh);
+            case AppSettings.UNIT_PHONE:
+                toggleUnit.check(R.id.btn_unit_phone);
+                break;
+
+            case AppSettings.UNIT_EV:
+                toggleUnit.check(R.id.btn_unit_ev);
+                break;
+
+            default:
+                toggleUnit.check(R.id.btn_unit_kwh);
         }
 
         TextView tvUnitInfo = view.findViewById(R.id.tv_unit_info);
+
         updateUnitInfo(tvUnitInfo, unit);
+
         toggleUnit.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
+
             String u = unitFromButtonId(checkedId);
             updateUnitInfo(tvUnitInfo, u);
         });
 
-        // Save
+        // Save button
         view.findViewById(R.id.btn_save_settings).setOnClickListener(v -> {
-            String goalStr = inputGoal.getText() != null ? inputGoal.getText().toString().trim() : "";
+
+            String goalStr =
+                    inputGoal.getText() != null
+                            ? inputGoal.getText().toString().trim()
+                            : "";
+
             if (!goalStr.isEmpty()) {
                 try {
-                    AppSettings.setSavingsGoal(requireContext(), Float.parseFloat(goalStr));
-                } catch (NumberFormatException ignored) {}
+                    AppSettings.setSavingsGoal(
+                            requireContext(),
+                            Float.parseFloat(goalStr)
+                    );
+                } catch (NumberFormatException ignored) {
+                }
             }
-            AppSettings.setEnergyUnit(requireContext(), unitFromButtonId(toggleUnit.getCheckedButtonId()));
-            Toast.makeText(requireContext(), "Einstellungen gespeichert", Toast.LENGTH_SHORT).show();
-            requireActivity().getSupportFragmentManager().popBackStack();
+
+            AppSettings.setEnergyUnit(
+                    requireContext(),
+                    unitFromButtonId(toggleUnit.getCheckedButtonId())
+            );
+
+            Toast.makeText(
+                    requireContext(),
+                    "Einstellungen gespeichert",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            requireActivity()
+                    .getSupportFragmentManager()
+                    .popBackStack();
         });
 
         return view;
     }
 
     private String unitFromButtonId(int id) {
-        if (id == R.id.btn_unit_phone) return AppSettings.UNIT_PHONE;
-        if (id == R.id.btn_unit_ev)    return AppSettings.UNIT_EV;
+
+        if (id == R.id.btn_unit_phone)
+            return AppSettings.UNIT_PHONE;
+
+        if (id == R.id.btn_unit_ev)
+            return AppSettings.UNIT_EV;
+
         return AppSettings.UNIT_KWH;
     }
 
     private void updateUnitInfo(TextView tv, String unit) {
+
         switch (unit) {
+
             case AppSettings.UNIT_PHONE:
                 tv.setText("1 kWh ≈ 67 Handyladungen (à 15 Wh)");
                 break;
+
             case AppSettings.UNIT_EV:
                 tv.setText("1 kWh ≈ 6 km E-Auto Reichweite");
                 break;
+
             default:
                 tv.setText("Standard-Einheit für Energie");
         }

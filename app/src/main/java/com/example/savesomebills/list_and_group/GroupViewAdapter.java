@@ -16,26 +16,31 @@ import java.util.List;
 public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.ViewHolder> {
     List<Group> group_list;
     private OnGroupClickListener listener;
-    private OnIconClickListener iconListener;
+    private OnGroupLongClickListener longClickListener;
 
     public interface OnGroupClickListener {
         void onGroupClick(String groupId);
     }
 
-    public interface OnIconClickListener {
-        void onIconClick(int position, String groupId);
+    public interface OnGroupLongClickListener {
+        void onGroupLongClick(int position, String groupId);
     }
 
     public void setOnGroupClickListener(OnGroupClickListener listener) {
         this.listener = listener;
     }
 
-    public void setOnIconClickListener(OnIconClickListener listener) {
-        this.iconListener = listener;
+    public void setOnGroupLongClickListener(OnGroupLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     public GroupViewAdapter(List<Group> id_list) {
         this.group_list = id_list;
+    }
+
+    public void updateData(List<Group> newGroups) {
+        group_list = newGroups;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -51,11 +56,13 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         holder.getName().setText(ob.getName());
         holder.getEnergy().setText(AppSettings.formatEnergy(holder.getEnergy().getContext(),0.001 * ob.getEnergy_amount() ) );
         holder.getIcon().setText(ob.getIcon());
+        holder.getCost().setText(ob.getUsage());
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onGroupClick(ob.getName());
         });
-        holder.getIcon().setOnClickListener(v -> {
-            if (iconListener != null) iconListener.onIconClick(holder.getAdapterPosition(), ob.getName());
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) longClickListener.onGroupLongClick(holder.getAdapterPosition(), ob.getName());
+            return true;
         });
     }
 
@@ -70,12 +77,19 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         TextView energy;
         TextView unit;
 
+        TextView cost;
+
         public ViewHolder(@NonNull View view) {
             super(view);
             this.name = view.findViewById(R.id.device_group_name);
             this.icon = view.findViewById(R.id.device_group_icon);
             this.energy = view.findViewById(R.id.device_group_energy);
             this.unit = view.findViewById(R.id.device_group_unit);
+            this.cost = view.findViewById(R.id.device_group_cost);
+        }
+
+        public TextView getCost() {
+            return cost;
         }
 
         public TextView getName() { return name; }

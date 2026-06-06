@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +28,7 @@ import java.util.Map;
 public class GroupDeviceFragment extends Fragment {
 
     private static final String PREFS_GROUP_ICONS = "group_icons";
+    private GroupViewAdapter adapter;
 
     @Nullable
     @Override
@@ -39,7 +42,7 @@ public class GroupDeviceFragment extends Fragment {
 
         List<Group> groups = buildGroups(prefs);
 
-        GroupViewAdapter adapter = new GroupViewAdapter(groups);
+        adapter = new GroupViewAdapter(groups);
 
         adapter.setOnGroupClickListener(groupId ->
                 requireActivity().getSupportFragmentManager()
@@ -49,13 +52,41 @@ public class GroupDeviceFragment extends Fragment {
                         .commit()
         );
 
-        adapter.setOnIconClickListener((position, groupId) ->
-                EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
-                    prefs.edit().putString("icon_" + groupId, emoji).apply();
-                    groups.get(position).setIcon(emoji);
-                    adapter.notifyItemChanged(position);
-                })
-        );
+        adapter.setOnGroupLongClickListener((position, groupId) -> {
+            String[] options = {"Icon ändern", "Raum umbenennen"};
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(groupId)
+                    .setItems(options, (dialog, which) -> {
+                        if (which == 0) {
+                            EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
+                                prefs.edit().putString("icon_" + groupId, emoji).apply();
+                                adapter.updateData(buildGroups(prefs));
+                            });
+                        } else {
+                            EditText input = new EditText(requireContext());
+                            input.setInputType(InputType.TYPE_CLASS_TEXT);
+                            input.setText(groupId);
+                            input.selectAll();
+                            new AlertDialog.Builder(requireContext())
+                                    .setTitle("Raum umbenennen")
+                                    .setView(input)
+                                    .setPositiveButton("Speichern", (d, w) -> {
+                                        String newName = input.getText().toString().trim();
+                                        if (newName.isEmpty() || newName.equals(groupId)) return;
+                                        DeviceStorage.renameGroup(requireContext(), groupId, newName);
+                                        String oldIcon = prefs.getString("icon_" + groupId, "🏠");
+                                        prefs.edit()
+                                                .remove("icon_" + groupId)
+                                                .putString("icon_" + newName, oldIcon)
+                                                .apply();
+                                        adapter.updateData(buildGroups(prefs));
+                                    })
+                                    .setNegativeButton("Abbrechen", null)
+                                    .show();
+                        }
+                    })
+                    .show();
+        });
 
         RecyclerView recyclerView = view.findViewById(R.id.group_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -76,6 +107,16 @@ public class GroupDeviceFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (adapter != null) {
+            SharedPreferences prefs = requireActivity()
+                    .getSharedPreferences(PREFS_GROUP_ICONS, Context.MODE_PRIVATE);
+            adapter.updateData(buildGroups(prefs));
+        }
+    }
+
     private List<Group> buildGroups(SharedPreferences prefs) {
         List<Device> devices = DeviceStorage.loadAll(requireContext());
 
@@ -90,7 +131,7 @@ public class GroupDeviceFragment extends Fragment {
             for (Device d : entry.getValue()) totalWatt += d.wattOn;
 
             String icon = prefs.getString("icon_" + entry.getKey(), "🏠");
-            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt , 0));
+            groups.add(new Group(new ArrayList<>(), icon, entry.getKey(), totalWatt, 0, ""));
         }
         return groups;
     }
