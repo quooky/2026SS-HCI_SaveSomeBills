@@ -89,9 +89,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_xs"
                 android:orientation="horizontal">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/march" android:textColor="?attr/appColorOnSurfaceVariant" android:textSize="@dimen/text_sm" />
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/april" android:textColor="?attr/appColorOnSurfaceVariant" android:textSize="@dimen/text_sm" />
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/may" android:textColor="?attr/appColorOnSurfaceVariant" android:textSize="@dimen/text_sm" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="Juni" android:textColor="?attr/appColorOnSurfaceVariant" android:textSize="@dimen/text_sm" />
             </LinearLayout>
 
         </LinearLayout>
