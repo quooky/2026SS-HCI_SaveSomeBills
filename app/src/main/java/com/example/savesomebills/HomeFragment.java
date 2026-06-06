@@ -536,7 +536,7 @@ public class HomeFragment extends Fragment {
             LinearLayout.LayoutParams binParams =
                     new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
 
-            binParams.setMargins((int) (16 * density), 0, (int) (16 * density), 0);
+            binParams.setMargins((int) (24 * density), 0, (int) (24 * density), 0);
             binContainer.setLayoutParams(binParams);
 
             TextView valueLabel = new TextView(getContext());

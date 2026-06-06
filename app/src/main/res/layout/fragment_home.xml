@@ -97,7 +97,7 @@
                     android:layout_gravity="bottom|end"
                     android:layout_marginBottom="77dp"
                     android:text="@string/threshold_value"
-                    android:textColor="?attr/appColorOnSurfaceVariant"
+                    android:textColor="@color/color_on_primary"
                     android:textSize="@dimen/text_xs" />
 
             </FrameLayout>
