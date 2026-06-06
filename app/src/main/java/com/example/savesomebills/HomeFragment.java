@@ -66,6 +66,17 @@ public class HomeFragment extends Fragment {
         ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
         LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
+        view.findViewById(R.id.btn_settings).setOnClickListener(v ->
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        );
+
+        view.findViewById(R.id.btn_info).setOnClickListener(v -> {
+            // Placeholder for info action
+        });
+
         new Thread(() -> {
             final List<Integer> histData =
                     applyActionTipSavings(loadData("savings_data.txt", false));
@@ -78,7 +89,10 @@ public class HomeFragment extends Fragment {
                 if (getView() == null) return;
 
                 int threshold = (int) AppSettings.getSavingsGoal(requireContext());
-
+                TextView histTitle = view.findViewById(R.id.hist_title);
+                if (histTitle != null) {
+                    histTitle.setText(getString(R.string.savings_target, threshold));
+                }
                 if (histogramContainer != null) {
                     histogramContainer.post(() -> {
                         populateHistogram(

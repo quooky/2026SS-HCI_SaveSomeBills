@@ -14,15 +14,33 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="@dimen/spacing_sm">
 
+        <ImageButton
+            android:id="@+id/btn_settings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Settings"
+            android:src="@drawable/ic_settings"
+            android:tint="?attr/appColorOnSurface" />
+
         <TextView
             android:id="@+id/greeting"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:gravity="center"
             android:text="@string/greeting"
             android:textAppearance="?attr/textAppearanceHeadlineMedium"
             android:textColor="?attr/appColorOnSurface" />
 
+        <ImageButton
+            android:id="@+id/btn_info"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/info_content_description"
+            android:src="@android:drawable/ic_dialog_info"
+            android:tint="?attr/appColorOnSurface" />
     </LinearLayout>
 
     <!-- Sparziel -->
@@ -46,6 +64,8 @@
                 android:id="@+id/hist_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
                 android:text="@string/savings_target"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/appColorOnSurface" />
@@ -119,6 +139,8 @@
                 android:id="@+id/elec_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
                 android:text="@string/electricity_prices_today"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/appColorOnSurface" />
@@ -140,7 +162,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="20dp"
-                        android:gravity="bottom"
+                        android:gravity="center"
                         android:paddingStart="0dp"
                         android:paddingEnd="@dimen/spacing_xs"
                         android:text="@string/elec_unit"
@@ -206,7 +228,9 @@
                 android:id="@+id/cheapest_hours_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/spacing_sm"
+                android:gravity="center"
                 android:text="@string/cheapest_hours_label"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?attr/appColorAccent" />
