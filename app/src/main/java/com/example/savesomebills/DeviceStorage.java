@@ -46,6 +46,29 @@ public class DeviceStorage {
         writeAll(context, devices);
     }
 
+    public static void renameGroup(Context context, String oldName, String newName) {
+        List<Device> devices = loadAll(context);
+        for (Device d : devices) {
+            if (d.groupId.equals(oldName)) d.groupId = newName;
+        }
+        writeAll(context, devices);
+
+        // Update rooms list in app_prefs
+        android.content.SharedPreferences prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String json = prefs.getString("rooms", "[]");
+        try {
+            org.json.JSONArray array = new org.json.JSONArray(json);
+            org.json.JSONArray updated = new org.json.JSONArray();
+            for (int i = 0; i < array.length(); i++) {
+                String room = array.getString(i);
+                updated.put(room.equals(oldName) ? newName : room);
+            }
+            prefs.edit().putString("rooms", updated.toString()).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<Device> loadAll(Context context) {
         List<Device> devices = new ArrayList<>();
         try {

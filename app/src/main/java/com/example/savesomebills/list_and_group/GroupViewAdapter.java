@@ -16,22 +16,22 @@ import java.util.List;
 public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.ViewHolder> {
     List<Group> group_list;
     private OnGroupClickListener listener;
-    private OnIconClickListener iconListener;
+    private OnGroupLongClickListener longClickListener;
 
     public interface OnGroupClickListener {
         void onGroupClick(String groupId);
     }
 
-    public interface OnIconClickListener {
-        void onIconClick(int position, String groupId);
+    public interface OnGroupLongClickListener {
+        void onGroupLongClick(int position, String groupId);
     }
 
     public void setOnGroupClickListener(OnGroupClickListener listener) {
         this.listener = listener;
     }
 
-    public void setOnIconClickListener(OnIconClickListener listener) {
-        this.iconListener = listener;
+    public void setOnGroupLongClickListener(OnGroupLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     public GroupViewAdapter(List<Group> id_list) {
@@ -60,8 +60,9 @@ public class GroupViewAdapter extends RecyclerView.Adapter<GroupViewAdapter.View
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onGroupClick(ob.getName());
         });
-        holder.getIcon().setOnClickListener(v -> {
-            if (iconListener != null) iconListener.onIconClick(holder.getAdapterPosition(), ob.getName());
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) longClickListener.onGroupLongClick(holder.getAdapterPosition(), ob.getName());
+            return true;
         });
     }
 

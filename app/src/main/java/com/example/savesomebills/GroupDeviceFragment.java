@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,13 +52,41 @@ public class GroupDeviceFragment extends Fragment {
                         .commit()
         );
 
-        adapter.setOnIconClickListener((position, groupId) ->
-                EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
-                    prefs.edit().putString("icon_" + groupId, emoji).apply();
-                    groups.get(position).setIcon(emoji);
-                    adapter.notifyItemChanged(position);
-                })
-        );
+        adapter.setOnGroupLongClickListener((position, groupId) -> {
+            String[] options = {"Icon ändern", "Raum umbenennen"};
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(groupId)
+                    .setItems(options, (dialog, which) -> {
+                        if (which == 0) {
+                            EmojiPickerDialog.show(requireContext(), EmojiPickerDialog.ROOM_EMOJIS, emoji -> {
+                                prefs.edit().putString("icon_" + groupId, emoji).apply();
+                                adapter.updateData(buildGroups(prefs));
+                            });
+                        } else {
+                            EditText input = new EditText(requireContext());
+                            input.setInputType(InputType.TYPE_CLASS_TEXT);
+                            input.setText(groupId);
+                            input.selectAll();
+                            new AlertDialog.Builder(requireContext())
+                                    .setTitle("Raum umbenennen")
+                                    .setView(input)
+                                    .setPositiveButton("Speichern", (d, w) -> {
+                                        String newName = input.getText().toString().trim();
+                                        if (newName.isEmpty() || newName.equals(groupId)) return;
+                                        DeviceStorage.renameGroup(requireContext(), groupId, newName);
+                                        String oldIcon = prefs.getString("icon_" + groupId, "🏠");
+                                        prefs.edit()
+                                                .remove("icon_" + groupId)
+                                                .putString("icon_" + newName, oldIcon)
+                                                .apply();
+                                        adapter.updateData(buildGroups(prefs));
+                                    })
+                                    .setNegativeButton("Abbrechen", null)
+                                    .show();
+                        }
+                    })
+                    .show();
+        });
 
         RecyclerView recyclerView = view.findViewById(R.id.group_recycle_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
