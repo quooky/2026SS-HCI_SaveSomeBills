@@ -66,13 +66,6 @@ public class HomeFragment extends Fragment {
         ViewPager2 piePager = view.findViewById(R.id.pie_chart_pager);
         LinearLayout pieDots = view.findViewById(R.id.dots_pie_chart);
 
-        view.findViewById(R.id.btn_settings).setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SettingsFragment())
-                .addToBackStack(null)
-                .commit()
-        );
-
         view.findViewById(R.id.btn_info).setOnClickListener(v -> {
             // Placeholder for info action
         });
@@ -543,7 +536,7 @@ public class HomeFragment extends Fragment {
             LinearLayout.LayoutParams binParams =
                     new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
 
-            binParams.setMargins((int) (8 * density), 0, (int) (8 * density), 0);
+            binParams.setMargins((int) (16 * density), 0, (int) (16 * density), 0);
             binContainer.setLayoutParams(binParams);
 
             TextView valueLabel = new TextView(getContext());
